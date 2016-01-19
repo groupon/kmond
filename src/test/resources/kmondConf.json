@@ -1,0 +1,38 @@
+{
+  "port": 8080,
+  "nagiosClusterId": "some_cluster",
+  "nagiosHttpClient": {
+    "connectTimeout": 100,
+    "requestTimeout": 60000,
+    "keepAlive": true,
+    "usePooledBuffers": true,
+    "pipelining": false
+  },
+  "configLoaders": {
+    "tmpDir": "target",
+    "destDir": "target",
+    "httpConfigLoaders": {
+      "nagiosClusters": {
+        "host": "some_config_server_hostname",
+        "port": 80,
+        "urlPath": "/some_datacenter/nagios_info.html.gz",
+        "filenameBase": "nagios_info.html.gz",
+        "refershInterval": 60000
+      },
+      "gangliaClusterHosts": {
+        "host": "some_config_server_hostname",
+        "port": 80,
+        "urlPath": "/configs/some_datacenter/ganglia_cluster.yml",
+        "filenameBase": "ganglia_clusters.yml",
+        "refershInterval": 60000
+      },
+      "gangliaClusterPorts": {
+        "host": "some_config_server_hostname",
+        "port": 80,
+        "urlPath": "/some_path/ganglia_port_clusters.yml",
+        "filenameBase": "ganglia_port_clusters.yml",
+        "refershInterval": 60000
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+# Copyright 2015 Groupon Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+8088: cluster1
+8090: cluster2
+8091: cluster3
+8601: cluster4
+8602: cluster5
+8622: cluster6
+8647: cluster7
+8648: cluster8
+8649: cluster9
+8658: cluster10
+8659: cluster11
+8660: cluster12
+8661: cluster13
+8662: cluster14
+8663: cluster15
+8664: cluster16
+8665: cluster17
+8666: cluster18
+8667: cluster19
+8668: cluster20
+8669: cluster21
+8670: cluster22
+8671: cluster23
+8672: cluster24
+8673: cluster25
+8674: cluster26
+8675: cluster27
+8676: cluster28
+8677: cluster29
+8678: cluster30
+8679: cluster31
+8680: cluster32
+8681: cluster33
+8682: cluster34
+8683: cluster35
+8684: cluster36
+8685: cluster37
+8686: cluster38
+8687: cluster39
+8688: cluster40
+8689: cluster41
+8690: cluster42
+8691: cluster43
+8692: cluster44
+8693: cluster45
+8694: cluster46
+8695: cluster47
+8696: cluster48
+8697: cluster49
+8698: cluster50
+8699: cluster51
+8700: cluster52
+8701: cluster53
+8702: cluster54
+8703: cluster55
+8704: cluster56
+8705: cluster57
+8706: cluster58
+8707: cluster59
+8708: cluster60
+8709: cluster61
+8710: cluster62
+8711: cluster63
+8712: cluster64
+8713: cluster65
+8714: cluster66

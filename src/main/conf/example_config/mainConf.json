@@ -1,0 +1,16 @@
+{
+  "verticles": {
+    "ConfigVerticle": {
+      "class": "com.groupon.aint.kmond.ConfigVerticle",
+      "instances": 1,
+      "worker": true,
+      "config": "src/main/conf/dev/kmondConf.json"
+    },
+    "KMonDVerticle": {
+      "class": "com.groupon.aint.kmond.KMonDVerticle",
+      "instances": 1,
+      "config": "src/main/conf/dev/kmondConf.json",
+      "dependencies": [ "ConfigVerticle" ]
+    }
+  }
+}

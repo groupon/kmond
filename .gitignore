@@ -1,0 +1,27 @@
+# Output
+target/
+logs/
+log/
+pom.xml.versionsBackup
+dependency-reduced-pom.xml
+*.class
+
+# IntelliJ
+.idea
+.settings/
+*.iml
+
+# Maven
+target
+
+# Eclipse
+.metadata/
+.externalToolBuilders/
+maven-eclipse.xml
+bin/
+eclipse-bin/
+**/.classpath
+**/RemoteSystemsTempFiles/
+
+# Mac
+.DS_Store

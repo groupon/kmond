@@ -1,0 +1,311 @@
+{
+  "someother": {
+    "data": "here"
+  },
+  "nagios_clusters": {
+    "production_cluster": {
+      "nagiosHost39": [
+        57,
+        58,
+        59
+      ],
+      "nagiosHost27": [
+        21,
+        22,
+        23
+      ],
+      "nagiosHost26": [
+        18,
+        19,
+        20
+      ],
+      "nagiosHost33": [
+        39,
+        40,
+        41
+      ],
+      "nagiosHost31": [
+        33,
+        34,
+        35
+      ],
+      "nagiosHost29": [
+        27,
+        28,
+        29
+      ],
+      "nagiosHost21": [
+        3,
+        4,
+        5
+      ],
+      "nagiosHost48": [
+        92,
+        93,
+        94,
+        95
+      ],
+      "nagiosHost43": [
+        72,
+        73,
+        74,
+        75
+      ],
+      "nagiosHost20": [
+        0,
+        1,
+        2
+      ],
+      "nagiosHost44": [
+        76,
+        77,
+        78,
+        79
+      ],
+      "nagiosHost25": [
+        15,
+        16,
+        17
+      ],
+      "nagiosHost42": [
+        68,
+        69,
+        70,
+        71
+      ],
+      "nagiosHost28": [
+        24,
+        25,
+        26
+      ],
+      "nagiosHost30": [
+        30,
+        31,
+        32
+      ],
+      "nagiosHost38": [
+        54,
+        55,
+        56
+      ],
+      "nagiosHost47": [
+        88,
+        89,
+        90,
+        91
+      ],
+      "nagiosHost34": [
+        42,
+        43,
+        44
+      ],
+      "nagiosHost23": [
+        9,
+        10,
+        11
+      ],
+      "nagiosHost37": [
+        51,
+        52,
+        53
+      ],
+      "nagiosHost41": [
+        64,
+        65,
+        66,
+        67
+      ],
+      "nagiosHost46": [
+        84,
+        85,
+        86,
+        87
+      ],
+      "nagiosHost49": [
+        96,
+        97,
+        98,
+        99
+      ],
+      "nagiosHost22": [
+        6,
+        7,
+        8
+      ],
+      "nagiosHost24": [
+        12,
+        13,
+        14
+      ],
+      "nagiosHost45": [
+        80,
+        81,
+        82,
+        83
+      ],
+      "nagiosHost40": [
+        60,
+        61,
+        62,
+        63
+      ],
+      "nagiosHost32": [
+        36,
+        37,
+        38
+      ],
+      "nagiosHost35": [
+        45,
+        46,
+        47
+      ],
+      "nagiosHost36": [
+        48,
+        49,
+        50
+      ]
+    },
+    "staging_cluster": {
+      "nagiosStagingHost1": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "nagiosStagingHost11": [
+        50,
+        51,
+        52,
+        53,
+        54
+      ],
+      "nagiosStagingHost6": [
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "nagiosStagingHost4": [
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "nagiosStagingHost5": [
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "nagiosStagingHost17": [
+        80,
+        81,
+        82,
+        83,
+        84
+      ],
+      "nagiosStagingHost19": [
+        90,
+        91,
+        92,
+        93,
+        94
+      ],
+      "nagiosStagingHost14": [
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "nagiosStagingHost3": [
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "nagiosStagingHost9": [
+        40,
+        41,
+        42,
+        43,
+        44
+      ],
+      "nagiosStagingHost8": [
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "nagiosStagingHost12": [
+        55,
+        56,
+        57,
+        58,
+        59
+      ],
+      "nagiosStagingHost2": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "nagiosStagingHost18": [
+        85,
+        86,
+        87,
+        88,
+        89
+      ],
+      "nagiosStagingHost15": [
+        70,
+        71,
+        72,
+        73,
+        74
+      ],
+      "nagiosStagingHost13": [
+        60,
+        61,
+        62,
+        63,
+        64
+      ],
+      "nagiosStagingHost16": [
+        75,
+        76,
+        77,
+        78,
+        79
+      ],
+      "nagiosStagingHost7": [
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "nagiosStagingHost20": [
+        95,
+        96,
+        97,
+        98,
+        99
+      ],
+      "nagiosStagingHost10": [
+        45,
+        46,
+        47,
+        48,
+        49
+      ]
+    }
+  }
+}
