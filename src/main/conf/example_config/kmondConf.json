@@ -1,6 +1,7 @@
 {
   "port": 8080,
   "heartbeatPath": "/var/kmond/shared/heartbeat.txt",
+  "heartbeatUrlPath": "/healthcheck",
   "nagiosClusterId": "someClusterId",
   "nagiosHttpClient": {
     "connectTimeout": 100,

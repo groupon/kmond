@@ -114,8 +114,9 @@ class KMonDVerticle() : AbstractVerticle() {
 
         // Add healthcheck endpoint
         val healthcheckHandler = HealthcheckHandler(config().getString("heartbeatPath", "heartbeat.txt"))
-        router.head("/grpn/healthcheck").handler(healthcheckHandler)
-        router.get("/grpn/healthcheck").handler(healthcheckHandler)
+        val healthCheckUrlPath = config().getString("heartbeatUrlPath", "/grpn/healthcheck")
+        router.head(healthCheckUrlPath).handler(healthcheckHandler)
+        router.get(healthCheckUrlPath).handler(healthcheckHandler)
 
         router.route().failureHandler {
             it.response().setStatusCode(500)
