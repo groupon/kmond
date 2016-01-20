@@ -88,7 +88,7 @@
     <log4j.version>1.2.17</log4j.version>
     <netty.version>4.0.31.Final</netty.version>
     <slf4j.version>1.7.12</slf4j.version>
-    <vertx.version>3.0.1</vertx.version>
+    <vertx.version>3.1.0</vertx.version>
 
     <!-- Other dependency versions -->
     <commons-logging.version>1.1.1</commons-logging.version>
@@ -102,7 +102,7 @@
     <mockito.version>1.9.5</mockito.version>
     <promise.version>0.12.0</promise.version>
     <vertx.testtools.version>3.1.0</vertx.testtools.version>
-    <vertx-utils.version>3.0.0</vertx-utils.version>
+    <vertx-utils.version>3.0.1</vertx-utils.version>
     <reflections.version>0.9.9</reflections.version>
 
     <!-- Plugin versions -->
@@ -350,4 +350,10 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <id>freehep</id>
+      <url>http://java.freehep.org/maven2</url>
+    </repository>
+  </repositories>
 </project>
