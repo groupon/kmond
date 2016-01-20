@@ -9,8 +9,7 @@ before_script:
 - gpg --import groupon-api.key
 script:
 - "./mvnw clean install --settings settings.xml -P ci -Dgpg.skip=true -U"
-- if [ \( -n "${TRAVIS_TAG}" \) -a "${TRAVIS_PULL_REQUEST}" = "false" ]; then ./mvnw
-  deploy --settings settings.xml -P ci -DskipAllVerification=true; fi;
+- 'if [ ( -n "${TRAVIS_TAG}" ) -a "${TRAVIS_PULL_REQUEST}" = "false" ]; then ./mvnw deploy --settings settings.xml -P ci -DskipAllVerification=true; fi;'
 env:
   global:
   - secure: vRcn5r16NSySL/DNRjNbBs1iqOXI7b1dwWr+f6SbtNyDlffeKuF7SN1HIRzNfS+xnUtGDqjVhbZ315ZXoH46epoo3vvA0FsByJxitX1X/gTXhglM5c1RsTDtocqUL3CYDcSG4U3LuE0DmEN4E5wfwp0JFK5qPDICCLaSChY1J/ffCemLTEYFbyYKRpjh5wlFpIWOSYU1fyfCXZ1c/1AZyH92E088ctN+wsfn3LXNQyFpsf4tvd4b7JZfMbDT7tw6b/AOH5mLPoVM5EQSCIxrYijRSzkkcTnR3rTnBXHy0HSGmvE+c3NTlL+VDudBOWfqPqZlOjnbWCocmpS1/J35QjMVf4uX/f1ZsECLUaxbl6cPfDaDAtX1K96N0rAgEo1VmrNP5uAqbN6t/Nue2F8T/lfo6ogFNKdw27+URUqUPV2JWB3CzvrfWNZjCbC8LeZHHd5ov0/s3dSWf/q1qcEmAGoATiWGCcjPVcP4eIRcnmNUCz096tfmeb0mjMwiHh1sQmCE0anZa0mz8cq8upk7QhjOvaZ1Qca/VERYebnyKJUUIqnuRMTeFov5SycNcB+ZjUeO4E/3GbkM8J91REszxvPQtimUaVVMGejfbnAZzA/yrTOfV8DMx1P3f+UH5nzoT4qZUlJqOFAEQlGR5K1OX9UAH/Gl0dQa4xeU1dzMM5E=
