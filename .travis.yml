@@ -8,5 +8,11 @@ install: true
 before_script:
 - gpg --import groupon-api.key
 script:
-- ./mvnw clean install --settings settings.xml -P ci -Dgpg.skip=true -U
-- if [ \( -n "${TRAVIS_TAG}" \) -a "${TRAVIS_PULL_REQUEST}" = "false" ]; then ./mvnw deploy --settings settings.xml -P ci -DskipAllVerification=true; fi;
+- "./mvnw clean install --settings settings.xml -P ci -Dgpg.skip=true -U"
+- if [ \( -n "${TRAVIS_TAG}" \) -a "${TRAVIS_PULL_REQUEST}" = "false" ]; then ./mvnw
+  deploy --settings settings.xml -P ci -DskipAllVerification=true; fi;
+env:
+  global:
+  - secure: vRcn5r16NSySL/DNRjNbBs1iqOXI7b1dwWr+f6SbtNyDlffeKuF7SN1HIRzNfS+xnUtGDqjVhbZ315ZXoH46epoo3vvA0FsByJxitX1X/gTXhglM5c1RsTDtocqUL3CYDcSG4U3LuE0DmEN4E5wfwp0JFK5qPDICCLaSChY1J/ffCemLTEYFbyYKRpjh5wlFpIWOSYU1fyfCXZ1c/1AZyH92E088ctN+wsfn3LXNQyFpsf4tvd4b7JZfMbDT7tw6b/AOH5mLPoVM5EQSCIxrYijRSzkkcTnR3rTnBXHy0HSGmvE+c3NTlL+VDudBOWfqPqZlOjnbWCocmpS1/J35QjMVf4uX/f1ZsECLUaxbl6cPfDaDAtX1K96N0rAgEo1VmrNP5uAqbN6t/Nue2F8T/lfo6ogFNKdw27+URUqUPV2JWB3CzvrfWNZjCbC8LeZHHd5ov0/s3dSWf/q1qcEmAGoATiWGCcjPVcP4eIRcnmNUCz096tfmeb0mjMwiHh1sQmCE0anZa0mz8cq8upk7QhjOvaZ1Qca/VERYebnyKJUUIqnuRMTeFov5SycNcB+ZjUeO4E/3GbkM8J91REszxvPQtimUaVVMGejfbnAZzA/yrTOfV8DMx1P3f+UH5nzoT4qZUlJqOFAEQlGR5K1OX9UAH/Gl0dQa4xeU1dzMM5E=
+  - secure: c/pw/G5BebYbycI5xaE1lvxD43QqLl46VG+rTEjjR5Che+QZ+JFeOJw1IE/AK6xY17r3ZFLn7mLbm6463NJ1QCnJOAxnv1dGr3Kysxm5gYrmCqfpizGuotVgnZUkuVxkKFgNvkeFKuksZOP+35IZA+Jqo2tE0D184nLiwOahTufUABdz08FFIQagIhS3d7wA8xSlFDohQRu29fgVFyxEEPQbbwBbnlyc7SvJQuzUel6YXOsyjQXVPy+r1gc7SjYIU6uk55Fcfzf1B6e3pCDBMSyEqFNSA3EH2K6y8SbHKrKV7symOfPujIAJMkkJGB/1l5x38AT2HwdI9i5J46u7mLvDw8RSYo+D5dryZlQtAMNy+Y9kxrXaj5PRPh1h6U9YranD61YVf0dNQxoFc5d2AvfB3YsXfDDCpPyM0N2Ur4RTLONMqsYi4wJfv238gR1o0iru9J8KN1Gu+mVICo7oRGwaCeGrETRlZmlxNV+9PY+WmRvFzunzZVibI5isJGx1Tmm/ZYSPS0kD1c6gTDHFtM/tcBJp3CFbzYPDPKQpTid72XgQICzIA2/uFnRW/7+/YXdXDanVN4vXZc3sQRE0qMPL1rVcrCoKZvRONPEt2yaO72OalfmELqcNKsSMoPaYpW27DCDGN1HSvdNgHGsaNYa/ZIPGarqcXXR20ulbUkk=
+  - secure: j+2HJVVSu0pMRlQnZWScVc3E6id9wEdjaiP6+5spunatB4WoRZ2qramH6eMqsGCcCm1jZkd8C6Zi1VVKPaiKwxSTLmC3xX8EtC2DMwxqA3228TLIJhYUwTfuvTv5rSPt0RKIgtS3MeovyDfgIDdHbdX5I7MRITT1NzOv/zokdWYMLO5zObXCjvxcz7YbKZPI2sKNnSt7JwpYGlMGCUUruCyKD9mHy3bRmA/GsiE01tQEyPtQS0yhMTG+sjIt2VM8wqAInzbwiZZNiCAQp2JmnGBr2Vduaik2H1nhOZNjB0gh2TASBk2EiQHMvN8Qnpe9TFdAnppkkISIlybweurmbGTPzacG+mngyOeohahjICBQsmtGhzQ/j5GE6bInjLVKw1ZXS9ff5COoxbeQWTpGOiNsqUKzRPgVDUEqI5sulT9I84lPj5oqI28swQ/qWBqKbuvd7sQ9TF9THGV8VdvhtXhzQBsNGVvTw1vGlPJIbPO+klCBfUhOB0f6M4BViC1eQ5CpTRcI61Wgd63yQCt+JYqUz6pDjKfMTgE1yBXqmRHB06cc0fliiSvjlVwCVFUGRsBJFv8mw0PNl2gGDe3dcIp/7TMaLszBN2hjypcYZlX4m999CJIpPG2idVr/519zZi33f9RH0dgR5C2Yk11OdPEHv6wLynVuAY/66qhw5aA=
