@@ -28,7 +28,7 @@
   <packaging>jar</packaging>
   <name>Kotlin Monitor Daemon</name>
   <description>A service to forward metrics to both Nagios and Ganglia.</description>
-  <version>0.0.28</version>
+  <version>0.0.29-SNAPSHOT</version>
 
   <licenses>
     <license>
@@ -71,7 +71,7 @@
     <connection>scm:git:git@github.com:groupon/kmond.git</connection>
     <developerConnection>scm:git:git@github.com:groupon/kmond.git</developerConnection>
     <url>https://github.com/groupon/kmond</url>
-    <tag>kmond-0.0.28</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
