@@ -100,7 +100,7 @@
     <logback-steno.version>1.9.3</logback-steno.version>
     <metrics.version>0.4.2</metrics.version>
     <mockito.version>1.9.5</mockito.version>
-    <promise.version>0.11.0</promise.version>
+    <promise.version>0.12.0</promise.version>
     <vertx.testtools.version>3.1.0</vertx.testtools.version>
     <vertx-utils.version>3.0.0</vertx-utils.version>
     <reflections.version>0.9.9</reflections.version>
