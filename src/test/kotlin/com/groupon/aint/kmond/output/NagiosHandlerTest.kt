@@ -41,6 +41,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 
 /**
+ * Tests for NagiosHandler.
+ *
  * @author Stuart Siegrist (fsiegrist at groupon dot com)
  */
 class NagiosHandlerTest {
