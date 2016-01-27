@@ -19,6 +19,7 @@ import com.groupon.aint.kmond.admin.HealthcheckHandler
 import com.groupon.aint.kmond.admin.ReloadConfigHandler
 import com.groupon.aint.kmond.eventbus.CompositeMessageProducer
 import com.groupon.aint.kmond.eventbus.V1ResultCodec
+import com.groupon.aint.kmond.exception.InvalidParameterException
 import com.groupon.aint.kmond.input.V1Handler
 import com.groupon.aint.kmond.output.GangliaHandler
 import com.groupon.aint.kmond.output.LoggingHandler
@@ -119,7 +120,12 @@ class KMonDVerticle() : AbstractVerticle() {
         router.get(healthCheckUrlPath).handler(healthcheckHandler)
 
         router.route().failureHandler {
-            it.response().setStatusCode(500)
+            when(it.failure()) {
+                is InvalidParameterException ->
+                    it.response().setStatusCode(400)
+                else ->
+                    it.response().setStatusCode(500)
+            }
             it.response().end(it.failure().message)
         }
 

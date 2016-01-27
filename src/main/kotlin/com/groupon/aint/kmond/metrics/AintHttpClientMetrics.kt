@@ -15,34 +15,38 @@
  */
 package com.groupon.aint.kmond.metrics
 
+import com.arpnetworking.metrics.Metrics
 import com.arpnetworking.metrics.MetricsFactory
 import io.vertx.core.http.HttpClientRequest
 import io.vertx.core.http.HttpClientResponse
 import io.vertx.core.http.WebSocket
 import io.vertx.core.net.SocketAddress
 import io.vertx.core.spi.metrics.HttpClientMetrics
+import java.util.concurrent.TimeUnit
 
 /**
  * HTTP client metrics adapter to AINT metrics.
  *
  * @author Gil Markham (gil at groupon dot com)
  */
-class AintHttpClientMetrics(val metricsFactory: MetricsFactory): HttpClientMetrics<TimerWrapper, Void?, Void?> {
+class AintHttpClientMetrics(val metrics: (Metrics.() -> Unit) -> Unit): HttpClientMetrics<TimerWrapper, Void?, Void?> {
     override fun disconnected(socketMetric: Void?, remoteAddress: SocketAddress?) {
         if (remoteAddress != null) {
-            val metrics = metricsFactory.create()
-            metrics.addAnnotation("host", remoteAddress.host())
-            metrics.addAnnotation("port", remoteAddress.port().toString())
-            metrics.incrementCounter("vertx/httpClient/disconnect")
+            metrics {
+                addAnnotation("host", remoteAddress.host())
+                addAnnotation("port", remoteAddress.port().toString())
+                incrementCounter("vertx/httpClient/disconnect")
+            }
         }
     }
 
     override fun connected(remoteAddress: SocketAddress?): Void? {
         if (remoteAddress != null) {
-            val metrics = metricsFactory.create()
-            metrics.addAnnotation("host", remoteAddress.host())
-            metrics.addAnnotation("port", remoteAddress.port().toString())
-            metrics.incrementCounter("vertx/httpClient/connect")
+            metrics {
+                addAnnotation("host", remoteAddress.host())
+                addAnnotation("port", remoteAddress.port().toString())
+                incrementCounter("vertx/httpClient/connect")
+            }
         }
 
         return null
@@ -50,46 +54,46 @@ class AintHttpClientMetrics(val metricsFactory: MetricsFactory): HttpClientMetri
 
     override fun connected(socketMetric: Void?, webSocket: WebSocket?): Void? {
         // Could be extends to pass websocket annotation information via a webSocketMetric object
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/webSocket/connect")
-
+        metrics {
+            incrementCounter("vertx/webSocket/connect")
+        }
         return null
     }
 
     override fun disconnected(webSocketMetric: Void?) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/webSocket/disconnect")
+        metrics {
+            incrementCounter("vertx/webSocket/disconnect")
+        }
     }
 
     override fun requestBegin(socketMetric: Void?, localAddress: SocketAddress?, remoteAddress: SocketAddress?, request: HttpClientRequest?): TimerWrapper {
-        val metrics = metricsFactory.create()
-        return TimerWrapper(metrics, metrics.createTimer("vertx/httpClient/${remoteAddress?.host()}/request"))
+        return TimerWrapper("vertx/httpClient/${remoteAddress?.host()}/request", System.nanoTime())
     }
 
     override fun responseEnd(requestMetric: TimerWrapper?, response: HttpClientResponse?) {
         if (requestMetric != null) {
-            requestMetric.timer.close()
-            requestMetric.metrics.addAnnotation("status", response?.statusCode().toString())
-            requestMetric.metrics.close()
+            metrics {
+                setTimer(requestMetric.metric, System.nanoTime() - requestMetric.timestamp, TimeUnit.NANOSECONDS)
+            }
         }
     }
 
     override fun bytesWritten(socketMetric: Void?, remoteAddress: SocketAddress?, numberOfBytes: Long) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpClient/${remoteAddress?.host()}/bytesWritten", numberOfBytes)
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpClient/${remoteAddress?.host()}/bytesWritten", numberOfBytes)
+        }
     }
 
     override fun bytesRead(socketMetric: Void?, remoteAddress: SocketAddress?, numberOfBytes: Long) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpClient/${remoteAddress?.host()}/bytesRead", numberOfBytes)
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpClient/${remoteAddress?.host()}/bytesRead", numberOfBytes)
+        }
     }
 
     override fun exceptionOccurred(socketMetric: Void?, remoteAddress: SocketAddress?, t: Throwable?) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpClient/${remoteAddress?.host()}/exceptions")
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpClient/${remoteAddress?.host()}/exceptions")
+        }
     }
 
     override fun close() {

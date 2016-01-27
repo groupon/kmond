@@ -63,7 +63,7 @@ class NagiosHandlerTest {
         Mockito.`when`(vertx.sharedData()).thenReturn(sharedData)
         Mockito.`when`(sharedData.getLocalMap<String, NagiosClusters>(Mockito.anyString())).thenReturn(localMap)
         Mockito.`when`(message.body()).thenReturn(
-                V1Result("path", "monitor", 0, "output", 1, TimeUnit.SECONDS.convert(System.nanoTime(), TimeUnit.SECONDS),
+                V1Result("path", "monitor", 0, "output", 1, TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS),
                         "host", "cluster", metricsMap))
         Mockito.`when`(httpClient.request(Mockito.eq(HttpMethod.POST), Mockito.anyString(), httpHandlerCaptor.capture()))
                 .thenReturn(httpRequest)

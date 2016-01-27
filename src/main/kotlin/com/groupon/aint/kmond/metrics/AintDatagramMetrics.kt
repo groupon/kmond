@@ -15,7 +15,7 @@
  */
 package com.groupon.aint.kmond.metrics
 
-import com.arpnetworking.metrics.MetricsFactory
+import com.arpnetworking.metrics.Metrics
 import io.vertx.core.net.SocketAddress
 import io.vertx.core.spi.metrics.DatagramSocketMetrics
 
@@ -24,29 +24,29 @@ import io.vertx.core.spi.metrics.DatagramSocketMetrics
  *
  * @author Gil Markham (gil at groupon dot com)
  */
-class AintDatagramMetrics(val metricsFactory: MetricsFactory): DatagramSocketMetrics {
+class AintDatagramMetrics(val metrics: (Metrics.() -> Unit) -> Unit): DatagramSocketMetrics {
     override fun listening(localAddress: SocketAddress?) {
-        val metric = metricsFactory.create()
-        metric.incrementCounter("vertx/datagram/listening")
-        metric.close()
+        metrics {
+            incrementCounter("vertx/datagram/listening")
+        }
     }
 
     override fun exceptionOccurred(socketMetric: Void?, remoteAddress: SocketAddress?, t: Throwable?) {
-        val metric = metricsFactory.create()
-        metric.incrementCounter("vertx/datagram/errors")
-        metric.close()
+        metrics {
+            incrementCounter("vertx/datagram/errors")
+        }
     }
 
     override fun bytesRead(socketMetric: Void?, remoteAddress: SocketAddress?, numberOfBytes: Long) {
-        val metric = metricsFactory.create()
-        metric.incrementCounter("vertx/datagram/bytesRead", numberOfBytes)
-        metric.close()
+        metrics {
+            incrementCounter("vertx/datagram/bytesRead", numberOfBytes)
+        }
     }
 
     override fun bytesWritten(socketMetric: Void?, remoteAddress: SocketAddress?, numberOfBytes: Long) {
-        val metric = metricsFactory.create()
-        metric.incrementCounter("vertx/datagram/bytesWritten", numberOfBytes)
-        metric.close()
+        metrics {
+            incrementCounter("vertx/datagram/bytesWritten", numberOfBytes)
+        }
     }
 
     override fun isEnabled(): Boolean {
