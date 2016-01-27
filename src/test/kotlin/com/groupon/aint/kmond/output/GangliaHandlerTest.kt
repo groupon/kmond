@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 package com.groupon.aint.kmond.output
 
@@ -30,6 +29,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
+ * Tests for GangliaHandler.
+ * 
  * @author Stuart Siegrist (fsiegrist at groupon dot com)
  */
 class GangliaHandlerTest {
