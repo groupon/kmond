@@ -24,6 +24,7 @@ import io.vertx.core.spi.VertxMetricsFactory
 import io.vertx.core.spi.metrics.VertxMetrics
 import java.io.File
 import java.util.ArrayList
+import kotlin.concurrent.timer
 
 /**
  * Implementation of VertxMetricsFactory using AintMetricsFactory.
@@ -60,7 +61,8 @@ class AintMetricsFactory : VertxMetricsFactory {
                 .setServiceName(aintMetricsOptions.serviceName)
                 .build())
 
-        vertx?.setPeriodic(aintMetricsOptions.closeFrequency, {l -> metricsAdapter.close() })
+
+        metricsAdapter.start()
 
         return metricsAdapter
     }

@@ -36,8 +36,10 @@ import io.vertx.core.spi.metrics.EventBusMetrics
 import io.vertx.core.spi.metrics.HttpClientMetrics
 import io.vertx.core.spi.metrics.HttpServerMetrics
 import io.vertx.core.spi.metrics.TCPMetrics
+import java.util.Timer
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
+import kotlin.concurrent.timer
 import kotlin.concurrent.write
 
 /**
@@ -48,6 +50,7 @@ import kotlin.concurrent.write
 class AintMetricsAdapter(val metricsFactory: MetricsFactory): DummyVertxMetrics() {
     private var metrics = metricsFactory.create()
     private val lock = ReentrantReadWriteLock()
+    private var closeTimer: Timer? = null;
 
     val readMetrics: ((Metrics.() -> Unit) -> Unit) = {l -> lock.read { metrics.l() } }
 
@@ -111,11 +114,26 @@ class AintMetricsAdapter(val metricsFactory: MetricsFactory): DummyVertxMetrics(
         return true
     }
 
-    override fun close() {
+    internal fun start(periodMs : Long = 500) {
+        lock.write {
+            if (closeTimer == null) {
+                closeTimer = timer("AintMetricsPeriodic", true, periodMs, periodMs) {
+                    internalClose();
+                }
+            }
+        }
+    }
+
+    fun internalClose() {
         val oldMetrics = metrics
         lock.write {
             metrics = metricsFactory.create()
         }
         oldMetrics.close()
+    }
+
+    override fun close() {
+        closeTimer?.cancel()
+        internalClose();
     }
 }

@@ -16,6 +16,7 @@
 package com.groupon.aint.kmond.input
 
 import com.groupon.aint.kmond.Metrics
+import com.groupon.aint.kmond.exception.InvalidParameterException
 import io.vertx.core.MultiMap
 import java.util.HashMap
 import kotlin.text.Regex
@@ -33,15 +34,27 @@ data class V1Result(override val path: String,
                     override val timestamp: Long,
                     override val host: String,
                     override val cluster: String,
-                    override val metrics: Map<String, Float>): Metrics {
+                    override val metrics: Map<String, Float>) : Metrics {
     companion object {
         fun build(formParams: MultiMap): V1Result {
-            val pathParam = formParams.get("path") ?: throw IllegalArgumentException("path is required")
-            val monitor = formParams.get("monitor") ?: throw IllegalArgumentException("monitor is required")
-            val status = formParams.get("status")?.toInt() ?: throw IllegalArgumentException("status is required and must be an integer")
-            val output = (formParams.get("output") ?: throw IllegalArgumentException("output is required")).replace(Regex("\\s"), " ").trim()
-            val runInterval = formParams.get("runs_every")?.toInt() ?: 300
-            val timestamp = formParams.get("timestamp")?.toLong() ?: System.currentTimeMillis()
+            val pathParam = formParams.get("path") ?: throw InvalidParameterException("path is required")
+            val monitor = formParams.get("monitor") ?: throw InvalidParameterException("monitor is required")
+            val status = try {
+                formParams.get("status")?.toInt() ?: throw InvalidParameterException("status is required")
+            } catch (e: NumberFormatException) {
+                throw InvalidParameterException("status must be an integer")
+            }
+            val output = (formParams.get("output") ?: throw InvalidParameterException("output is required")).replace(Regex("\\s"), " ").trim()
+            val runInterval = try {
+                formParams.get("runs_every")?.toInt() ?: 300
+            } catch (e: NumberFormatException) {
+                throw InvalidParameterException("runs_every must be an integer")
+            }
+            val timestamp = try {
+                formParams.get("timestamp")?.toLong() ?: System.currentTimeMillis()
+            } catch (e: NumberFormatException) {
+                throw InvalidParameterException("timestamp must be a long")
+            }
             val pathElements = pathParam.split('/')
             val cluster = pathElements.first()
             val host = pathElements.last()
@@ -62,7 +75,7 @@ data class V1Result(override val path: String,
                 }
                 return metricMap
             } else {
-               return emptyMap()
+                return emptyMap()
             }
         }
     }

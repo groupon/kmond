@@ -15,6 +15,7 @@
  */
 package com.groupon.aint.kmond.input
 
+import com.groupon.aint.kmond.exception.InvalidParameterException
 import io.vertx.core.MultiMap
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -26,35 +27,35 @@ import kotlin.test.assertTrue
 class V1ResultTest {
     val defaultOutput = "OK|foo=0.1000;bar=0.0000;baz=1.0000"
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = InvalidParameterException::class)
     fun testFailsOnMissingPathParam() {
         val formParams = buildSampleFormParams()
         formParams.remove("path")
         V1Result.build(formParams)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = InvalidParameterException::class)
     fun testFailsOnMissingMonitorParam() {
         val formParams = buildSampleFormParams()
         formParams.remove("monitor")
         V1Result.build(formParams)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = InvalidParameterException::class)
     fun testFailsOnMissingStatusParam() {
         val formParams = buildSampleFormParams()
         formParams.remove("status")
         V1Result.build(formParams)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = InvalidParameterException::class)
     fun testFailsOnMissingOutputParam() {
         val formParams = buildSampleFormParams()
         formParams.remove("output")
         V1Result.build(formParams)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = InvalidParameterException::class)
     fun testFailsOnNonIntegerStatusParam() {
         val formParams = buildSampleFormParams()
         formParams.set("status","foo")
