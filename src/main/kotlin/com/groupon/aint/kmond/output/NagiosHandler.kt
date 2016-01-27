@@ -106,7 +106,7 @@ class NagiosHandler(val vertx: Vertx, val clusterId: String, val httpClientConfi
             metric.monitor
         }
 
-        val delay = TimeUnit.SECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS) - timestamp
+        val delay = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS) - timestamp
         val outputMessage = if ((runEvery == 0 && delay > 3600) || (runEvery != 0 && delay > 10 * runEvery)) {
             "(lagged " + TimeUnit.MINUTES.convert(delay, TimeUnit.SECONDS) + "mins) " + metric.output
         } else {
