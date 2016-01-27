@@ -15,6 +15,7 @@
  */
 package com.groupon.aint.kmond.metrics
 
+import com.arpnetworking.metrics.Metrics
 import com.arpnetworking.metrics.MetricsFactory
 import io.vertx.core.Verticle
 import io.vertx.core.datagram.DatagramSocket
@@ -35,6 +36,9 @@ import io.vertx.core.spi.metrics.EventBusMetrics
 import io.vertx.core.spi.metrics.HttpClientMetrics
 import io.vertx.core.spi.metrics.HttpServerMetrics
 import io.vertx.core.spi.metrics.TCPMetrics
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 /**
  * Vertx metrics adapter to AINT metrics.
@@ -42,17 +46,21 @@ import io.vertx.core.spi.metrics.TCPMetrics
  * @author Gil Markham (gil at groupon dot com)
  */
 class AintMetricsAdapter(val metricsFactory: MetricsFactory): DummyVertxMetrics() {
+    private var metrics = metricsFactory.create()
+    private val lock = ReentrantReadWriteLock()
+
+    val readMetrics: ((Metrics.() -> Unit) -> Unit) = {l -> lock.read { metrics.l() } }
 
     override fun createMetrics(eventBus: EventBus?): EventBusMetrics<*>? {
-        return AintEventBusMetrics(metricsFactory)
+        return AintEventBusMetrics(readMetrics)
     }
 
     override fun createMetrics(server: HttpServer?, localAddress: SocketAddress?, options: HttpServerOptions?): HttpServerMetrics<*, *, *>? {
-        return AintHttpServerMetrics(metricsFactory)
+        return AintHttpServerMetrics(readMetrics)
     }
 
     override fun createMetrics(client: HttpClient?, options: HttpClientOptions?): HttpClientMetrics<*, *, *>? {
-        return AintHttpClientMetrics(metricsFactory)
+        return AintHttpClientMetrics(readMetrics)
     }
 
     override fun createMetrics(server: NetServer?, localAddress: SocketAddress?, options: NetServerOptions?): TCPMetrics<*>? {
@@ -64,35 +72,35 @@ class AintMetricsAdapter(val metricsFactory: MetricsFactory): DummyVertxMetrics(
     }
 
     override fun createMetrics(socket: DatagramSocket?, options: DatagramSocketOptions?): DatagramSocketMetrics? {
-        return AintDatagramMetrics(metricsFactory)
+        return AintDatagramMetrics(readMetrics)
     }
 
     override fun verticleUndeployed(verticle: Verticle?) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/verticle/${verticle?.javaClass?.simpleName}/undeployed")
-        metrics.close()
+        readMetrics {
+            incrementCounter("vertx/verticle/${verticle?.javaClass?.simpleName}/undeployed")
+        }
     }
 
     override fun verticleDeployed(verticle: Verticle?) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/verticle/${verticle?.javaClass?.simpleName}/deployed")
-        metrics.close()
+        readMetrics {
+            incrementCounter("vertx/verticle/${verticle?.javaClass?.simpleName}/deployed")
+        }
     }
 
     override fun timerCreated(id: Long) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/timers/created")
-        metrics.close()
+        readMetrics {
+            incrementCounter("vertx/timers/created")
+        }
     }
 
     override fun timerEnded(id: Long, cancelled: Boolean) {
-        val metrics = metricsFactory.create()
-        if (cancelled) {
-            metrics.incrementCounter("vertx/timers/cancelled")
-        } else {
-            metrics.incrementCounter("vertx/timers/ended")
+        readMetrics {
+            if (cancelled) {
+                incrementCounter("vertx/timers/cancelled")
+            } else {
+                incrementCounter("vertx/timers/ended")
+            }
         }
-        metrics.close()
     }
 
     override fun isMetricsEnabled(): Boolean {
@@ -104,5 +112,10 @@ class AintMetricsAdapter(val metricsFactory: MetricsFactory): DummyVertxMetrics(
     }
 
     override fun close() {
+        val oldMetrics = metrics
+        lock.write {
+            metrics = metricsFactory.create()
+        }
+        oldMetrics.close()
     }
 }

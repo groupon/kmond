@@ -54,11 +54,15 @@ class AintMetricsFactory : VertxMetricsFactory {
         }
 
 
-        return AintMetricsAdapter(TsdMetricsFactory.Builder()
+        val metricsAdapter = AintMetricsAdapter(TsdMetricsFactory.Builder()
                 .setSinks(sinkList)
                 .setClusterName(aintMetricsOptions.clusterName)
                 .setServiceName(aintMetricsOptions.serviceName)
                 .build())
+
+        vertx?.setPeriodic(aintMetricsOptions.closeFrequency, {l -> metricsAdapter.close() })
+
+        return metricsAdapter
     }
 
     override fun newOptions(): AintMetricsOptions {

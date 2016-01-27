@@ -15,80 +15,81 @@
  */
 package com.groupon.aint.kmond.metrics
 
-import com.arpnetworking.metrics.MetricsFactory
+import com.arpnetworking.metrics.Metrics
 import io.vertx.core.http.HttpServerRequest
 import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.http.ServerWebSocket
 import io.vertx.core.net.SocketAddress
 import io.vertx.core.spi.metrics.HttpServerMetrics
+import java.util.concurrent.TimeUnit
 
 /**
  * HTTP server metrics adapter to AINT metrics.
  *
  * @author Gil Markham (gil at groupon dot com)
  */
-class AintHttpServerMetrics(val metricsFactory: MetricsFactory): HttpServerMetrics<TimerWrapper, Void, Void> {
+class AintHttpServerMetrics(val metrics: (Metrics.() -> Unit) -> Unit): HttpServerMetrics<TimerWrapper, Void, Void> {
     override fun upgrade(requestMetric: TimerWrapper?, serverWebSocket: ServerWebSocket?): Void? {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpServer/websocket/upgrade")
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpServer/websocket/upgrade")
+        }
         return null
     }
 
     override fun connected(socketMetric: Void?, serverWebSocket: ServerWebSocket?): Void? {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpServer/websocket/connect")
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpServer/websocket/connect")
+        }
         return null
     }
 
     override fun disconnected(serverWebSocketMetric: Void?) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpServer/websocket/disconnect")
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpServer/websocket/disconnect")
+        }
     }
 
     override fun requestBegin(socketMetric: Void?, request: HttpServerRequest?): TimerWrapper? {
-        val metrics = metricsFactory.create()
-        return TimerWrapper(metrics, metrics.createTimer("vertx/httpServer/request"))
+        return TimerWrapper("vertx/httpServer/request", System.nanoTime())
     }
 
     override fun responseEnd(requestMetric: TimerWrapper?, response: HttpServerResponse?) {
         if (requestMetric != null) {
-            requestMetric.timer.close()
-            requestMetric.metrics.close()
+            metrics {
+               setTimer(requestMetric.metric, System.nanoTime() - requestMetric.timestamp, TimeUnit.NANOSECONDS)
+            }
         }
     }
 
     override fun bytesRead(socketMetric: Void?, remoteAddress: SocketAddress?, numberOfBytes: Long) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpServer/bytesRead", numberOfBytes)
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpServer/bytesRead", numberOfBytes)
+        }
     }
 
     override fun exceptionOccurred(socketMetric: Void?, remoteAddress: SocketAddress?, t: Throwable?) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpServer/exceptions")
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpServer/exceptions")
+        }
     }
 
     override fun bytesWritten(socketMetric: Void?, remoteAddress: SocketAddress?, numberOfBytes: Long) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpServer/bytesWritten", numberOfBytes)
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpServer/bytesWritten", numberOfBytes)
+        }
     }
 
     override fun connected(remoteAddress: SocketAddress?): Void? {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpServer/connect")
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpServer/connect")
+        }
         return null
     }
 
     override fun disconnected(socketMetric: Void?, remoteAddress: SocketAddress?) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/httpServer/disconnect")
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/httpServer/disconnect")
+        }
     }
 
     override fun isEnabled(): Boolean {

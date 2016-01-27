@@ -15,12 +15,9 @@
  */
 package com.groupon.aint.kmond.metrics
 
-import com.arpnetworking.metrics.Metrics
-import com.arpnetworking.metrics.Timer
-
 /**
  * Wrapper around AINT Metrics and Timer instance pair.
  *
  * @author Gil Markham (gil at groupon dot com)
  */
-data class TimerWrapper(val metrics: Metrics, val timer: Timer)
+data class TimerWrapper(val metric: String, val timestamp: Long)

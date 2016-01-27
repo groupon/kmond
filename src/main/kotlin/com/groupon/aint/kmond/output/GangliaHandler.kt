@@ -33,6 +33,7 @@ import io.vertx.core.buffer.Buffer
 import io.vertx.core.datagram.DatagramSocket
 import io.vertx.core.eventbus.Message
 import java.util.ArrayList
+import java.util.concurrent.TimeUnit
 import kotlin.text.Regex
 
 /**
@@ -82,6 +83,7 @@ class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
 
     fun createXdrs(metrics: Metrics): List<Pair<Buffer, Buffer>> {
         val xdrs = ArrayList<Pair<Buffer, Buffer>>()
+        val hostname = "${metrics.host}:${metrics.host}"
         metrics.metrics.forEach { entry ->
             val (key, value) = entry
             xdrs.add(createXdr(GangliaMetric(
@@ -89,9 +91,18 @@ class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
                     type = metricType(key),
                     value = normalizeValue(value),
                     runInterval = metrics.runInterval,
-                    hostname = "${metrics.host}:${metrics.host}"
+                    hostname = hostname
             )))
         }
+
+        // Add status metric
+        xdrs.add(createXdr(GangliaMetric(
+                name = "${metrics.monitor}_status",
+                type = metricType("status"),
+                value = statusValue(metrics),
+                runInterval = metrics.runInterval,
+                hostname = hostname
+        )))
 
         return xdrs
     }
@@ -145,6 +156,14 @@ class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
     }
 
     fun normalizeValue(value: Float): Float = if (Math.abs(value) < Math.exp(-200.0)) 0f else value
+
+    fun statusValue(metrics: Metrics): Int = if (isLagging(metrics)) 4 else metrics.status
+
+    fun isLagging(metrics: Metrics): Boolean {
+        // make grapher communicate when a service check is lagging (related to PRODTOOLS-1539)
+        val delay = TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS)  - metrics.timestamp
+        return (metrics.runInterval == 0 && delay > 3600) || (metrics.runInterval != 0 && delay > 10*metrics.runInterval) // 10 magic number analysis can be found in PRODTOOLS-1430
+    }
 
     fun metricType(name: String): String {
         return when (name.split('_').last()) {

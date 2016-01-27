@@ -15,7 +15,7 @@
  */
 package com.groupon.aint.kmond.metrics
 
-import com.arpnetworking.metrics.MetricsFactory
+import com.arpnetworking.metrics.Metrics
 import io.vertx.core.eventbus.ReplyFailure
 import io.vertx.core.spi.metrics.EventBusMetrics
 import java.util.Locale
@@ -25,7 +25,7 @@ import java.util.Locale
  *
  * @author Gil Markham (gil at groupon dot com)
  */
-class AintEventBusMetrics(val metricsFactory: MetricsFactory): EventBusMetrics<Void> {
+class AintEventBusMetrics(val metrics: (Metrics.() -> Unit) -> Unit): EventBusMetrics<Void> {
     override fun isEnabled(): Boolean {
         return true
     }
@@ -34,45 +34,45 @@ class AintEventBusMetrics(val metricsFactory: MetricsFactory): EventBusMetrics<V
     }
 
     override fun messageSent(address: String?, publish: Boolean, local: Boolean, remote: Boolean) {
-        val metrics = metricsFactory.create()
-        metrics.addAnnotation("broadcast", publish.toString())
-        metrics.addAnnotation("local", local.toString())
-        metrics.incrementCounter("vertx/eventBus/$address/sent")
-        metrics.close()
+        metrics {
+            addAnnotation("broadcast", publish.toString())
+            addAnnotation("local", local.toString())
+            incrementCounter("vertx/eventBus/$address/sent")
+        }
     }
 
     override fun messageWritten(address: String?, numberOfBytes: Int) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/eventBus/$address/bytesWritten", numberOfBytes.toLong())
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/eventBus/$address/bytesWritten", numberOfBytes.toLong())
+        }
     }
 
     override fun messageRead(address: String?, numberOfBytes: Int) {
-        val metrics = metricsFactory.create()
-        metrics.incrementCounter("vertx/eventBus/$address/bytesRead", numberOfBytes.toLong())
-        metrics.close()
+        metrics {
+            incrementCounter("vertx/eventBus/$address/bytesRead", numberOfBytes.toLong())
+        }
     }
 
     override fun replyFailure(address: String?, failure: ReplyFailure?) {
-        val metrics = metricsFactory.create()
-        metrics.addAnnotation("failure", failure.toString().toLowerCase(Locale.ENGLISH))
-        metrics.incrementCounter("vertx/eventBus/$address/replyFailures")
-        metrics.close()
+        metrics {
+            addAnnotation("failure", failure.toString().toLowerCase(Locale.ENGLISH))
+            incrementCounter("vertx/eventBus/$address/replyFailures")
+        }
     }
 
     override fun messageReceived(address: String?, publish: Boolean, local: Boolean, handlers: Int) {
-        val metrics = metricsFactory.create()
-        metrics.addAnnotation("broadcast", publish.toString())
-        metrics.addAnnotation("local", local.toString())
-        metrics.incrementCounter("vertx/eventBus/$address/received")
-        metrics.close()
+        metrics {
+            addAnnotation("broadcast", publish.toString())
+            addAnnotation("local", local.toString())
+            incrementCounter("vertx/eventBus/$address/received")
+        }
     }
 
     override fun handlerRegistered(address: String?, replyHandler: Boolean): Void? {
         if(!replyHandler) {
-            val metrics = metricsFactory.create()
-            metrics.incrementCounter("vertx/eventBus/$address/registered")
-            metrics.close()
+            metrics {
+                incrementCounter("vertx/eventBus/$address/registered")
+            }
         }
         return null
     }

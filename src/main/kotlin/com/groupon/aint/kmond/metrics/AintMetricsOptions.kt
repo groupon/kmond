@@ -26,6 +26,7 @@ class AintMetricsOptions(var enableQuerySink: Boolean = true,
                          var queryLogName: String = "query",
                          var queryLogExtension: String = ".log",
                          var queryLogHistory: Int = 4,
+                         var closeFrequency: Long = 500,
                          var queryLogPath: String = "log",
                          var clusterName: String = "change_me",
                          var serviceName: String = "vertx") : MetricsOptions()
