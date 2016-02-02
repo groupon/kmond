@@ -28,6 +28,7 @@ import com.groupon.vertx.utils.Logger
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpServer
@@ -118,6 +119,12 @@ class KMonDVerticle() : AbstractVerticle() {
         val healthCheckUrlPath = config().getString("heartbeatUrlPath", "/grpn/healthcheck")
         router.head(healthCheckUrlPath).handler(healthcheckHandler)
         router.get(healthCheckUrlPath).handler(healthcheckHandler)
+
+        // Add status.json endpoint
+        val statusUrlPath = config().getString("statusUrlPath", "/status.json")
+        // Read the status.json completely into a buffer
+        val statusFileBytes = Buffer.buffer(this.javaClass.getClassLoader().getResourceAsStream("status.json").readBytes(1024))
+        router.get(statusUrlPath).handler({ r -> r.response().end(statusFileBytes) })
 
         router.route().failureHandler {
             when(it.failure()) {
