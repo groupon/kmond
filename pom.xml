@@ -107,6 +107,9 @@
     <!-- Plugin versions -->
     <maven.assembly.plugin.version>2.6</maven.assembly.plugin.version>
     <maven.shade.plugin.version>2.4.2</maven.shade.plugin.version>
+
+    <!-- Do deploy when asked; overrides parent -->
+    <skipDeploy>false</skipDeploy>
   </properties>
 
   <profiles>
