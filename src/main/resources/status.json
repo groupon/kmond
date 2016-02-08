@@ -1,1 +1,1 @@
-{"sha":"${buildNumber}"}
+{"name":"${name}","version":"${version}","sha":"${buildNumber}"}
