@@ -32,14 +32,6 @@
             <fileMode>0644</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/target/classes</directory>
-            <outputDirectory></outputDirectory>
-            <fileMode>0644</fileMode>
-            <includes>
-                <include>**/status.json</include>
-            </includes>
-        </fileSet>
-        <fileSet>
             <directory>${project.basedir}/target</directory>
             <outputDirectory></outputDirectory>
             <fileMode>0644</fileMode>
