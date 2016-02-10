@@ -67,7 +67,7 @@ data class V1Result(override val path: String,
         private fun toMetrics(metricsString: String): Map<String, Float> {
             val outputParts = metricsString.split('|', limit = 2)
             if (outputParts.size == 2) {
-                val metricParts = outputParts[1].split(pattern = "[ ;]".toRegex())
+                val metricParts = outputParts[1].split(regex = "[ ;]".toRegex())
                 val metricMap = HashMap<String, Float>()
                 metricParts.filter { it.contains("=") }.map { kvPair ->
                     val (key, value) = kvPair.split("=", limit = 2)

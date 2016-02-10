@@ -144,6 +144,6 @@ class NagiosHandler(val vertx: Vertx, val clusterId: String, val httpClientConfi
     }
 
     private fun calculateBucket(host: String) : Int {
-        return host.toByteArray("UTF-8").sum() % 100
+        return host.toByteArray(Charsets.UTF_8).sum() % 100
     }
 }

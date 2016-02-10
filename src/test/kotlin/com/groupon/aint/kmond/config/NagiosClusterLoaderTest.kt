@@ -58,7 +58,7 @@ class NagiosClusterLoaderTest {
     @Test
     fun testReadExampleFile() {
         val loader = NagiosClusterLoader(vertx, File("/tmp"), false)
-        val buffer = Buffer.buffer(javaClass.getResourceAsStream("/nagios_info.json").reader("UTF8").readText())
+        val buffer = Buffer.buffer(javaClass.getResourceAsStream("/nagios_info.json").reader(Charsets.UTF_8).readText())
         Mockito.`when`(message.body()).thenReturn("foo")
         loader.handle(message)
         Mockito.verify(fileSystem).readFile(Matchers.eq("foo"), bufferCaptor.capture())

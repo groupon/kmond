@@ -59,7 +59,7 @@ class KMonDVerticleTest {
         Mockito.`when`(eventBus.sender<Metrics>(Mockito.any())).thenReturn(metricsProducer)
         Mockito.`when`(eventBus.sender<String>(Mockito.any())).thenReturn(stringProducer)
 
-        kmondConfig = JsonObject(javaClass.getResourceAsStream("/kmondConf.json").reader("UTF8").readText())
+        kmondConfig = JsonObject(javaClass.getResourceAsStream("/kmondConf.json").reader(Charsets.UTF_8).readText())
         Mockito.`when`(context.config()).thenReturn(kmondConfig)
     }
 

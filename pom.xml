@@ -79,8 +79,8 @@
     <!-- Default vertx options for exec:exec, overridden with the debug profile to enable debugging -->
     <vertx.debug.options>-showversion</vertx.debug.options>
 
-    <!-- Kotlin depencency versions -->
-    <kotlin.version>1.0.0-beta-2417</kotlin.version>
+    <!-- Kotlin dependency versions -->
+    <kotlin.version>1.0.0-rc-1036</kotlin.version>
 
     <!-- Vertx dependency versions -->
     <jackson.version>2.6.1</jackson.version>
@@ -270,6 +270,12 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-test</artifactId>
+      <version>${kotlin.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

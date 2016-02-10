@@ -56,7 +56,7 @@ class ConfigVerticleTest {
         Mockito.`when`(eventBus.sender<String>(Mockito.any())).thenReturn(stringProducer)
         Mockito.`when`(httpClient.get(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn(httpRequest)
 
-        kmondConfig = JsonObject(javaClass.getResourceAsStream("/kmondConf.json").reader("UTF8").readText())
+        kmondConfig = JsonObject(javaClass.getResourceAsStream("/kmondConf.json").reader(Charsets.UTF_8).readText())
         Mockito.`when`(context.config()).thenReturn(kmondConfig)
     }
 

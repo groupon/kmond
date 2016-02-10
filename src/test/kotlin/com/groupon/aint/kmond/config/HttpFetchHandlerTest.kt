@@ -57,7 +57,7 @@ class HttpFetchHandlerTest {
 
     @Test
     fun testSimpleGet() {
-        val buffer = Buffer.buffer(javaClass.getResourceAsStream("/ganglia_cluster.yml").reader("UTF8").readText())
+        val buffer = Buffer.buffer(javaClass.getResourceAsStream("/ganglia_cluster.yml").reader(Charsets.UTF_8).readText())
         Mockito.`when`(httpClient.get(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(),
                 responseHandler.capture())).thenReturn(httpRequest)
         Mockito.`when`(httpResponse.statusCode()).thenReturn(200)
@@ -78,7 +78,7 @@ class HttpFetchHandlerTest {
 
     @Test
     fun testGetFailure() {
-        val buffer = Buffer.buffer(javaClass.getResourceAsStream("/ganglia_cluster.yml").reader("UTF8").readText())
+        val buffer = Buffer.buffer(javaClass.getResourceAsStream("/ganglia_cluster.yml").reader(Charsets.UTF_8).readText())
         Mockito.`when`(httpClient.get(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(),
                 responseHandler.capture())).thenReturn(httpRequest)
         Mockito.`when`(httpResponse.statusCode()).thenReturn(400)
