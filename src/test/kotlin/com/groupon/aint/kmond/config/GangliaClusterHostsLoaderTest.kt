@@ -61,7 +61,7 @@ class GangliaClusterHostsLoaderTest {
 
     @Test
     fun testReadExampleFile() {
-        val buffer = Buffer.buffer(javaClass.getResourceAsStream("/ganglia_cluster.yml").reader("UTF8").readText())
+        val buffer = Buffer.buffer(javaClass.getResourceAsStream("/ganglia_cluster.yml").reader(Charsets.UTF_8).readText())
         Mockito.`when`(message.body()).thenReturn("foo")
         loader.handle(message)
         Mockito.verify(fileSystem).readFile(Matchers.eq("foo"), bufferCaptor.capture())
