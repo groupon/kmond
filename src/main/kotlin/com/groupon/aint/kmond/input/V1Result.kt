@@ -34,6 +34,7 @@ data class V1Result(override val path: String,
                     override val timestamp: Long,
                     override val host: String,
                     override val cluster: String,
+                    override val hasAlert: Boolean,
                     override val metrics: Map<String, Float>) : Metrics {
     companion object {
         fun build(formParams: MultiMap): V1Result {
@@ -55,13 +56,14 @@ data class V1Result(override val path: String,
             } catch (e: NumberFormatException) {
                 throw InvalidParameterException("timestamp must be a long")
             }
+            val hasAlert = formParams.get("has_alert")?.toBoolean() ?: false
             val pathElements = pathParam.split('/')
             val cluster = pathElements.first()
             val host = pathElements.last()
 
             return V1Result(path = pathParam, monitor = monitor, status = status, output = output,
                     runInterval = runInterval, timestamp = timestamp,
-                    host = host, cluster = cluster, metrics = toMetrics(output))
+                    host = host, cluster = cluster, hasAlert = hasAlert, metrics = toMetrics(output))
         }
 
         private fun toMetrics(metricsString: String): Map<String, Float> {

@@ -29,5 +29,6 @@ interface Metrics {
     val timestamp: Long
     val host: String
     val cluster: String
+    val hasAlert: Boolean
     val metrics: Map<String, Float>
 }
