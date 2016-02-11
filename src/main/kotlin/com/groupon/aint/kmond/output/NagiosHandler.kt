@@ -45,15 +45,15 @@ class NagiosHandler(val vertx: Vertx, val clusterId: String, val httpClientConfi
     }
 
     override fun handle(event: Message<Metrics>) {
-        val metrics = event.body().metrics;
-        if (metrics.none { it.key.endsWith("warning") || it.key.endsWith("critical") }) {
+        val metrics = event.body()
+        if (!metrics.hasAlert) {
             return event.reply(JsonObject()
                     .put("status", "success")
                     .put("code", 200)
                     .put("message", "No alert present"))
         }
 
-        val nagiosHost = getNagiosHost(clusterId, event.body().host) ?: return
+        val nagiosHost = getNagiosHost(clusterId, metrics.host) ?: return
         val httpClient = httpClientsMap[nagiosHost] ?: createHttpClient(nagiosHost)
         val httpRequest = httpClient.request(HttpMethod.POST, "/nagios/cmd.php", {
             event.reply(JsonObject()
@@ -79,7 +79,7 @@ class NagiosHandler(val vertx: Vertx, val clusterId: String, val httpClientConfi
 
     private fun createHttpClient(host: String) : HttpClient {
         val httpOptions = HttpClientOptions(httpClientConfig)
-        httpOptions.setDefaultHost(host)
+        httpOptions.defaultHost = host
         val httpClient = vertx.createHttpClient(httpOptions)
         httpClientsMap[host] = httpClient
         return httpClient

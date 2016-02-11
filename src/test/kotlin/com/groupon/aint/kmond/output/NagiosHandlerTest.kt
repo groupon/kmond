@@ -64,7 +64,7 @@ class NagiosHandlerTest {
         Mockito.`when`(sharedData.getLocalMap<String, NagiosClusters>(Mockito.anyString())).thenReturn(localMap)
         Mockito.`when`(message.body()).thenReturn(
                 V1Result("path", "monitor", 0, "output", 1, TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS),
-                        "host", "cluster", metricsMap))
+                        "host", "cluster", true, metricsMap))
         Mockito.`when`(httpClient.request(Mockito.eq(HttpMethod.POST), Mockito.anyString(), httpHandlerCaptor.capture()))
                 .thenReturn(httpRequest)
         Mockito.`when`(httpResponse.statusCode()).thenReturn(HttpResponseStatus.OK.code())
@@ -72,28 +72,7 @@ class NagiosHandlerTest {
     }
 
     @Test
-    fun hasWarningTest() {
-        val nagiosHandler = NagiosHandler(vertx, "clusterId", JsonObject())
-        metricsMap.put("mean_warning", 1F)
-        clusterMap.put("clusterId", mapOf(Pair("nagiosHost", (0..99).toList())))
-
-        Mockito.`when`(localMap.get(NagiosClusterLoader.NAME)).thenReturn(NagiosClusters(clusterMap))
-
-        nagiosHandler.handle(message)
-
-        httpHandlerCaptor.value.handle(httpResponse)
-
-        Mockito.verify(vertx, Mockito.times(1)).createHttpClient(Mockito.any(HttpClientOptions::class.java))
-        Mockito.verify(message, Mockito.times(1)).reply(replyCaptor.capture())
-
-        val reply = replyCaptor.value
-        assertEquals("success", reply.getString("status"))
-        assertEquals(HttpResponseStatus.OK.code(), reply.getInteger("code"))
-        assertEquals(HttpResponseStatus.OK.reasonPhrase(), reply.getString("message"))
-    }
-
-    @Test
-    fun hasCriticalTest() {
+    fun hasAlertsTest() {
         val nagiosHandler = NagiosHandler(vertx, "clusterId", JsonObject())
         metricsMap.put("mean_critical", 1F)
         clusterMap.put("clusterId", mapOf(Pair("nagiosHost", (0..99).toList())))
@@ -114,8 +93,11 @@ class NagiosHandlerTest {
     }
 
     @Test
-    fun noWarningOrCriticalTest() {
+    fun noAlertsTest() {
         val nagiosHandler = NagiosHandler(vertx, "clusterId", JsonObject())
+        Mockito.`when`(message.body()).thenReturn(
+                V1Result("path", "monitor", 0, "output", 1, TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS),
+                        "host", "cluster", false, metricsMap))
 
         nagiosHandler.handle(message)
 

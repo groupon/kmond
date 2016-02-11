@@ -47,27 +47,27 @@ class GangliaHandlerTest {
     fun isNotLaggingTest() {
         val gangliaHandler = GangliaHandler(vertx)
         assertFalse(gangliaHandler.isLagging(V1Result("path", "monitor", 0, "output", 1,
-                TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS), "host", "cluster", metricsMap)))
+                TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS), "host", "cluster", false, metricsMap)))
     }
 
     @Test
     fun isLaggingTest() {
         val gangliaHandler = GangliaHandler(vertx)
         assertTrue(gangliaHandler.isLagging(V1Result("path", "monitor", 0, "output", 1,
-                TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS) - 3700, "host", "cluster", metricsMap)))
+                TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS) - 3700, "host", "cluster", false, metricsMap)))
     }
 
     @Test
     fun statusValueNotLaggingTest() {
         val gangliaHandler = GangliaHandler(vertx)
         assertEquals(0, gangliaHandler.statusValue(V1Result("path", "monitor", 0, "output", 1,
-                TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS), "host", "cluster", metricsMap)))
+                TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS), "host", "cluster", false, metricsMap)))
     }
 
     @Test
     fun statusValueLaggingTest() {
         val gangliaHandler = GangliaHandler(vertx)
         assertEquals(4, gangliaHandler.statusValue(V1Result("path", "monitor", 0, "output", 1,
-                TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS) - 3700, "host", "cluster", metricsMap)))
+                TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS) - 3700, "host", "cluster", false, metricsMap)))
     }
 }
