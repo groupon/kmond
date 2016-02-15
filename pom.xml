@@ -80,7 +80,7 @@
     <vertx.debug.options>-showversion</vertx.debug.options>
 
     <!-- Kotlin dependency versions -->
-    <kotlin.version>1.0.0-rc-1036</kotlin.version>
+    <kotlin.version>1.0.0</kotlin.version>
 
     <!-- Vertx dependency versions -->
     <jackson.version>2.6.1</jackson.version>
