@@ -37,6 +37,7 @@ class GangliaHandlerTest {
     private val vertx = mock<Vertx>()
     private val datagramSocket = mock<DatagramSocket>()
     private val metricsMap = HashMap<String, Float>()
+    private val metricsFactory = mock<com.arpnetworking.metrics.MetricsFactory>()
 
     @Before
     fun setUp() {
@@ -45,28 +46,28 @@ class GangliaHandlerTest {
 
     @Test
     fun isNotLaggingTest() {
-        val gangliaHandler = GangliaHandler(vertx)
+        val gangliaHandler = GangliaHandler(vertx, metricsFactory)
         assertFalse(gangliaHandler.isLagging(V1Result("path", "monitor", 0, "output", 1,
                 TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS), "host", "cluster", false, metricsMap)))
     }
 
     @Test
     fun isLaggingTest() {
-        val gangliaHandler = GangliaHandler(vertx)
+        val gangliaHandler = GangliaHandler(vertx, metricsFactory)
         assertTrue(gangliaHandler.isLagging(V1Result("path", "monitor", 0, "output", 1,
                 TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS) - 3700, "host", "cluster", false, metricsMap)))
     }
 
     @Test
     fun statusValueNotLaggingTest() {
-        val gangliaHandler = GangliaHandler(vertx)
+        val gangliaHandler = GangliaHandler(vertx, metricsFactory)
         assertEquals(0, gangliaHandler.statusValue(V1Result("path", "monitor", 0, "output", 1,
                 TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS), "host", "cluster", false, metricsMap)))
     }
 
     @Test
     fun statusValueLaggingTest() {
-        val gangliaHandler = GangliaHandler(vertx)
+        val gangliaHandler = GangliaHandler(vertx, metricsFactory)
         assertEquals(4, gangliaHandler.statusValue(V1Result("path", "monitor", 0, "output", 1,
                 TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS) - 3700, "host", "cluster", false, metricsMap)))
     }

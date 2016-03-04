@@ -53,6 +53,10 @@ class NagiosHandlerTest {
     private val localMap = mock<LocalMap<String, NagiosClusters>>()
     private val replyCaptor = captor<JsonObject>()
     private val httpHandlerCaptor = captor<Handler<HttpClientResponse>>()
+    private val metricsFactory = mock<com.arpnetworking.metrics.MetricsFactory>()
+    private val metrics = mock<com.arpnetworking.metrics.Metrics>()
+    private val timer = mock<com.arpnetworking.metrics.Timer>()
+
 
     private val metricsMap = HashMap<String, Float>()
     private val clusterMap = HashMap<String, Map<String, List<Int>>>()
@@ -69,11 +73,13 @@ class NagiosHandlerTest {
                 .thenReturn(httpRequest)
         Mockito.`when`(httpResponse.statusCode()).thenReturn(HttpResponseStatus.OK.code())
         Mockito.`when`(httpResponse.statusMessage()).thenReturn(HttpResponseStatus.OK.reasonPhrase())
+        Mockito.`when`(metricsFactory.create()).thenReturn(metrics)
+        Mockito.`when`(metrics.createTimer(Mockito.any())).thenReturn(timer)
     }
 
     @Test
     fun hasAlertsTest() {
-        val nagiosHandler = NagiosHandler(vertx, "clusterId", JsonObject())
+        val nagiosHandler = NagiosHandler(vertx, metricsFactory, "clusterId", JsonObject())
         metricsMap.put("mean_critical", 1F)
         clusterMap.put("clusterId", mapOf(Pair("nagiosHost", (0..99).toList())))
 
@@ -94,7 +100,7 @@ class NagiosHandlerTest {
 
     @Test
     fun noAlertsTest() {
-        val nagiosHandler = NagiosHandler(vertx, "clusterId", JsonObject())
+        val nagiosHandler = NagiosHandler(vertx, metricsFactory, "clusterId", JsonObject())
         Mockito.`when`(message.body()).thenReturn(
                 V1Result("path", "monitor", 0, "output", 1, TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS),
                         "host", "cluster", false, metricsMap))
@@ -113,7 +119,7 @@ class NagiosHandlerTest {
 
     @Test
     fun buildsHttpClientOnceTest() {
-        val nagiosHandler = NagiosHandler(vertx, "clusterId", JsonObject())
+        val nagiosHandler = NagiosHandler(vertx, metricsFactory, "clusterId", JsonObject())
         metricsMap.put("warning", 1F)
         clusterMap.put("clusterId", mapOf(Pair("nagiosHost", (0..99).toList())))
 

@@ -15,6 +15,7 @@
  */
 package com.groupon.aint.kmond.output
 
+import com.arpnetworking.metrics.MetricsFactory
 import com.groupon.aint.kmond.Metrics
 import com.groupon.aint.kmond.config.GangliaClusterHostsLoader
 import com.groupon.aint.kmond.config.GangliaClusterPortsLoader
@@ -39,9 +40,12 @@ import kotlin.text.Regex
 /**
  * Output handler for sending events to Ganglia.
  *
+ * @param appMetricsFactory Used to create metrics with respect to KMonD, e.g. using the AINT Metrics platform;
+ * unrelated to the metrics being forwarded to Ganglia.
+ *
  * @author Gil Markham (gil at groupon dot com)
  */
-class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
+class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : Handler<Message<Metrics>> {
     private val datagramSocket = vertx.createDatagramSocket()
 
     companion object {
@@ -55,6 +59,9 @@ class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
         get() = vertx.sharedData().getLocalMap<String, GangliaClusterHosts>("configs")?.get(GangliaClusterHostsLoader.NAME)
 
     override fun handle(msg: Message<Metrics>) {
+        val appMetrics = appMetricsFactory.create()
+        val timer = appMetrics.createTimer("kmond/ganglia/request")
+
         val metrics = msg.body()
         val hosts = gangliaHostMapping?.getHosts(metrics.cluster) ?: emptySet()
         val port = gangliaPortMapping?.getPort(metrics.cluster)
@@ -65,12 +72,18 @@ class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
                 packets.forEach { packet ->
                     promise<DatagramSocket> {
                         thenAsync(SendDatagramPacket(packet.first, host, port))
-                                .thenAsync(SendDatagramPacket(packet.second, host, port))
+                        .thenAsync(SendDatagramPacket(packet.second, host, port))
+                        .thenSync({}, {
+                            timer.stop()
+                        })
 
                         after().thenSync({}, {
                                     log.warn("send", "failure", arrayOf("gangliaPort", "gangliaHost", "metricsCluster"),
                                             port, host, metrics.cluster, it)
                                 })
+                        .after().thenSync({
+                            appMetrics.close()
+                        })
 
                         fulfill(datagramSocket)
                     }
@@ -78,6 +91,7 @@ class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
             }
         } else {
             log.warn("send", "unknownCluster", arrayOf("cluster"), metrics.cluster)
+            appMetrics.close()
         }
     }
 
