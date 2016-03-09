@@ -41,8 +41,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Output handler for sending events to Ganglia.
  *
- * @param appMetricsFactory Used to create metrics with respect to KMonD, e.g. using the AINT Metrics platform;
- * unrelated to the metrics being forwarded to Ganglia.
+ * @param appMetricsFactory Used to create metrics that instrument KMonD itself; unrelated to the metrics being forwarded to Ganglia.
  *
  * @author Gil Markham (gil at groupon dot com)
  */
@@ -61,16 +60,16 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
         get() = vertx.sharedData().getLocalMap<String, GangliaClusterHosts>("configs")?.get(GangliaClusterHostsLoader.NAME)
 
     override fun handle(msg: Message<Metrics>) {
-        val appMetrics = appMetricsFactory.create()
 
         val metrics = msg.body()
         val hosts = gangliaHostMapping?.getHosts(metrics.cluster) ?: emptySet()
         val port = gangliaPortMapping?.getPort(metrics.cluster)
         val packets = createXdrs(metrics)
 
-        val requestTimer = appMetrics.createTimer(APP_METRICS_PREFIX + "/request")
+        val appMetrics = appMetricsFactory.create()
 
         if (port != null && hosts.size > 0) {
+            val requestTimer = appMetrics.createTimer(APP_METRICS_PREFIX + "/request")
             promise<DatagramSocket> {
                 var packetSizeSum: Long = 0;
                 hosts.forEach { host ->
@@ -103,6 +102,7 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
             }
         } else {
             log.warn("send", "unknownCluster", arrayOf("cluster"), metrics.cluster)
+            addSuccessMetric(appMetrics, false)
             appMetrics.close()
         }
     }
@@ -211,6 +211,11 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
 
     private fun closeMetrics(metrics: com.arpnetworking.metrics.Metrics, timer: Timer, success: Boolean) {
         timer.stop()
+        addSuccessMetric(metrics, success)
+        metrics.close()
+    }
+
+    private fun addSuccessMetric(metrics: com.arpnetworking.metrics.Metrics, success: Boolean) {
         var successGauge: Long
         var failGauge: Long
         if (success) {
@@ -222,6 +227,5 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
         }
         metrics.setGauge(APP_METRICS_PREFIX + "/success", successGauge)
         metrics.setGauge(APP_METRICS_PREFIX + "/failure", failGauge)
-        metrics.close()
     }
 }

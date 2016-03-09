@@ -33,8 +33,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Output handler for sending events to Nagios.
  *
- * @param appMetricsFactory Used to create metrics with respect to KMonD, e.g. using the AINT Metrics platform;
- * unrelated to the metrics being forwarded to Nagios.
+ * @param appMetricsFactory Used to create metrics that instrument KMonD itself; unrelated to the metrics being forwarded to Nagios.
  *
  * @author fsiegrist (fsiegrist at groupon dot com)
  */
