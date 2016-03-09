@@ -59,7 +59,7 @@ class NagiosHandlerTest {
     private val replyCaptor = captor<JsonObject>()
     private val httpHandlerCaptor = captor<Handler<HttpClientResponse>>()
     private val appMetricsEventCaptor = captor<Event>()
-    private val sink = mock<Sink>()
+    private var sink = mock<Sink>()
     private var metricsFactory: MetricsFactory = TsdMetricsFactory.Builder()
             .setClusterName("someCluster")
             .setHostName("someHost")
@@ -82,7 +82,6 @@ class NagiosHandlerTest {
                 .thenReturn(httpRequest)
         Mockito.`when`(httpResponse.statusCode()).thenReturn(HttpResponseStatus.OK.code())
         Mockito.`when`(httpResponse.statusMessage()).thenReturn(HttpResponseStatus.OK.reasonPhrase())
-        Mockito.`when`(sink.record(appMetricsEventCaptor.capture())).thenReturn(Unit)
     }
 
     @Test
@@ -118,14 +117,14 @@ class NagiosHandlerTest {
 
         httpHandlerCaptor.value.handle(httpResponse)
 
-        Mockito.verify(sink, Mockito.times(1)).record(Mockito.any())
+        Mockito.verify(sink, Mockito.times(1)).record(appMetricsEventCaptor.capture())
 
         val gaugeSamples = appMetricsEventCaptor.value.gaugeSamples
-        assertEquals(1, gaugeSamples.get("downstream/nagios/metrics_count")?.get(0)?.value)
+        assertEquals(1, gaugeSamples.get("downstream/nagios/metrics_count")?.get(0)?.value?.toInt())
         val counterSamples = appMetricsEventCaptor.value.counterSamples
-        assertEquals(1, counterSamples.get("downstream/nagios/status/2xx")?.get(0)?.value)
-        assertEquals(0, counterSamples.get("downstream/nagios/status/4xx")?.get(0)?.value)
-        assertEquals(0, counterSamples.get("downstream/nagios/status/5xx")?.get(0)?.value)
+        assertEquals(1, counterSamples.get("downstream/nagios/status/2xx")?.get(0)?.value?.toInt())
+        assertEquals(0, counterSamples.get("downstream/nagios/status/4xx")?.get(0)?.value?.toInt())
+        assertEquals(0, counterSamples.get("downstream/nagios/status/5xx")?.get(0)?.value?.toInt())
         val timerSamples = appMetricsEventCaptor.value.timerSamples
         assertEquals(1, timerSamples.get("downstream/nagios/request")?.size)
     }
