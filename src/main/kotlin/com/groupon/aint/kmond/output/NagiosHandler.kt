@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit
  */
 class NagiosHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory, val clusterId: String, val httpClientConfig: JsonObject = JsonObject()): Handler<Message<Metrics>> {
     private val httpClientsMap = HashMap<String, HttpClient>()
+    private val APP_METRICS_PREFIX = "downstream/nagios"
 
     companion object {
         private val log = Logger.getLogger(NagiosHandler::class.java)
@@ -62,7 +63,8 @@ class NagiosHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory, val
 
         // Metrics factory should never return null: unchecked null
         val appMetrics: com.arpnetworking.metrics.Metrics = appMetricsFactory.create()
-        val timer = appMetrics.createTimer("kmond/nagios/request")
+        appMetrics.setGauge(APP_METRICS_PREFIX + "/metrics_count", metrics.metrics.size.toLong())
+        val timer = appMetrics.createTimer(APP_METRICS_PREFIX + "/request")
 
         val httpRequest = httpClient.request(HttpMethod.POST, "/nagios/cmd.php", {
             timer.stop()
@@ -174,9 +176,9 @@ class NagiosHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory, val
             else -> countOther += 1
         }
 
-        metric.incrementCounter("kmond/nagios/status/2xx", count2xx)
-        metric.incrementCounter("kmond/nagios/status/4xx", count4xx)
-        metric.incrementCounter("kmond/nagios/status/5xx", count5xx)
-        metric.incrementCounter("kmond/nagios/status/other", countOther)
+        metric.incrementCounter(APP_METRICS_PREFIX + "/status/2xx", count2xx)
+        metric.incrementCounter(APP_METRICS_PREFIX + "/status/4xx", count4xx)
+        metric.incrementCounter(APP_METRICS_PREFIX + "/status/5xx", count5xx)
+        metric.incrementCounter(APP_METRICS_PREFIX + "/status/other", countOther)
     }
 }
