@@ -15,6 +15,10 @@
  */
 package com.groupon.aint.kmond.output
 
+import com.arpnetworking.metrics.Event
+import com.arpnetworking.metrics.MetricsFactory
+import com.arpnetworking.metrics.Sink
+import com.arpnetworking.metrics.impl.TsdMetricsFactory
 import com.groupon.aint.kmond.Metrics
 import com.groupon.aint.kmond.config.NagiosClusterLoader
 import com.groupon.aint.kmond.config.captor
@@ -36,6 +40,7 @@ import io.vertx.core.shareddata.SharedData
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import java.util.Arrays
 import java.util.HashMap
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
@@ -53,10 +58,14 @@ class NagiosHandlerTest {
     private val localMap = mock<LocalMap<String, NagiosClusters>>()
     private val replyCaptor = captor<JsonObject>()
     private val httpHandlerCaptor = captor<Handler<HttpClientResponse>>()
-    private val metricsFactory = mock<com.arpnetworking.metrics.MetricsFactory>()
-    private val metrics = mock<com.arpnetworking.metrics.Metrics>()
-    private val timer = mock<com.arpnetworking.metrics.Timer>()
-
+    private val appMetricsEventCaptor = captor<Event>()
+    private val sink = mock<Sink>()
+    private var metricsFactory: MetricsFactory = TsdMetricsFactory.Builder()
+            .setClusterName("someCluster")
+            .setHostName("someHost")
+            .setServiceName("someService")
+            .setSinks(Arrays.asList(sink))
+            .build()
 
     private val metricsMap = HashMap<String, Float>()
     private val clusterMap = HashMap<String, Map<String, List<Int>>>()
@@ -73,8 +82,7 @@ class NagiosHandlerTest {
                 .thenReturn(httpRequest)
         Mockito.`when`(httpResponse.statusCode()).thenReturn(HttpResponseStatus.OK.code())
         Mockito.`when`(httpResponse.statusMessage()).thenReturn(HttpResponseStatus.OK.reasonPhrase())
-        Mockito.`when`(metricsFactory.create()).thenReturn(metrics)
-        Mockito.`when`(metrics.createTimer(Mockito.any())).thenReturn(timer)
+        Mockito.`when`(sink.record(appMetricsEventCaptor.capture())).thenReturn(Unit)
     }
 
     @Test
@@ -96,6 +104,34 @@ class NagiosHandlerTest {
         assertEquals("success", reply.getString("status"))
         assertEquals(HttpResponseStatus.OK.code(), reply.getInteger("code"))
         assertEquals(HttpResponseStatus.OK.reasonPhrase(), reply.getString("message"))
+    }
+
+    @Test
+    fun testhasAlertsMetricsTest() {
+        val nagiosHandler = NagiosHandler(vertx, metricsFactory, "clusterId", JsonObject())
+        metricsMap.put("mean_critical", 1F)
+        clusterMap.put("clusterId", mapOf(Pair("nagiosHost", (0..99).toList())))
+
+        Mockito.`when`(localMap.get(NagiosClusterLoader.NAME)).thenReturn(NagiosClusters(clusterMap))
+
+        nagiosHandler.handle(message)
+
+        httpHandlerCaptor.value.handle(httpResponse)
+
+        Mockito.verify(sink, Mockito.times(1)).record(Mockito.any())
+
+        val gaugeSamples = appMetricsEventCaptor.value.gaugeSamples
+        assertEquals(1, gaugeSamples.get("downstream/nagios/metrics_count")?.get(0)?.value)
+        val counterSamples = appMetricsEventCaptor.value.counterSamples
+        assertEquals(1, counterSamples.get("downstream/nagios/status/2xx")?.get(0)?.value)
+        assertEquals(0, counterSamples.get("downstream/nagios/status/4xx")?.get(0)?.value)
+        assertEquals(0, counterSamples.get("downstream/nagios/status/5xx")?.get(0)?.value)
+        val timerSamples = appMetricsEventCaptor.value.timerSamples
+        assertEquals(1, timerSamples.get("downstream/nagios/request")?.size)
+
+
+
+
     }
 
     @Test
