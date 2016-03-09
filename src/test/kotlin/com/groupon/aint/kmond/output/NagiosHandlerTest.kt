@@ -107,7 +107,7 @@ class NagiosHandlerTest {
     }
 
     @Test
-    fun testhasAlertsMetricsTest() {
+    fun hasAlertsMetricsTest() {
         val nagiosHandler = NagiosHandler(vertx, metricsFactory, "clusterId", JsonObject())
         metricsMap.put("mean_critical", 1F)
         clusterMap.put("clusterId", mapOf(Pair("nagiosHost", (0..99).toList())))
@@ -128,10 +128,6 @@ class NagiosHandlerTest {
         assertEquals(0, counterSamples.get("downstream/nagios/status/5xx")?.get(0)?.value)
         val timerSamples = appMetricsEventCaptor.value.timerSamples
         assertEquals(1, timerSamples.get("downstream/nagios/request")?.size)
-
-
-
-
     }
 
     @Test

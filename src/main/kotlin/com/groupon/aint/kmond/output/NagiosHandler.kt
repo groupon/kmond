@@ -60,7 +60,6 @@ class NagiosHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory, val
         val nagiosHost = getNagiosHost(clusterId, metrics.host) ?: return
         val httpClient = httpClientsMap[nagiosHost] ?: createHttpClient(nagiosHost)
 
-        // Metrics factory should never return null: unchecked null
         val appMetrics: com.arpnetworking.metrics.Metrics = appMetricsFactory.create()
         appMetrics.setGauge(APP_METRICS_PREFIX + "/metrics_count", metrics.metrics.size.toLong())
         val timer = appMetrics.createTimer(APP_METRICS_PREFIX + "/request")
