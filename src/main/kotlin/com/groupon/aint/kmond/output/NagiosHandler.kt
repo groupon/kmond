@@ -61,7 +61,8 @@ class NagiosHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory, val
         val httpClient = httpClientsMap[nagiosHost] ?: createHttpClient(nagiosHost)
 
         val appMetrics: com.arpnetworking.metrics.Metrics = appMetricsFactory.create()
-        appMetrics.setGauge(APP_METRICS_PREFIX + "/metrics_count", metrics.metrics.size.toLong())
+        appMetrics.resetCounter(APP_METRICS_PREFIX + "/metrics_count")
+        appMetrics.incrementCounter(APP_METRICS_PREFIX + "/metrics_count", metrics.metrics.size.toLong())
         val timer = appMetrics.createTimer(APP_METRICS_PREFIX + "/request")
 
         val httpRequest = httpClient.request(HttpMethod.POST, "/nagios/cmd.php", {

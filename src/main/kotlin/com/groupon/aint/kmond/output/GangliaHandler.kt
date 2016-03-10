@@ -87,7 +87,8 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
                     }
                 }
 
-                appMetrics.setGauge(APP_METRICS_PREFIX + "/bytes_sent", packetSizeSum)
+                appMetrics.resetCounter(APP_METRICS_PREFIX + "/bytes_sent")
+                appMetrics.incrementCounter(APP_METRICS_PREFIX + "/bytes_sent", packetSizeSum)
 
                 after().thenSync({
                     closeMetrics(appMetrics, requestTimer, true)
@@ -213,16 +214,11 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
     }
 
     private fun addSuccessMetric(metrics: com.arpnetworking.metrics.Metrics, success: Boolean) {
-        var successGauge: Long
-        var failGauge: Long
+        var successGauge: Long = 0
         if (success) {
             successGauge = 1
-            failGauge = 0
-        } else {
-            successGauge = 0
-            failGauge = 1
         }
-        metrics.setGauge(APP_METRICS_PREFIX + "/success", successGauge)
-        metrics.setGauge(APP_METRICS_PREFIX + "/failure", failGauge)
+        metrics.resetCounter(APP_METRICS_PREFIX + "/success")
+        metrics.incrementCounter(APP_METRICS_PREFIX + "/success", successGauge)
     }
 }
