@@ -77,11 +77,8 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
                         packetSizeSum += packet.first.length() + packet.second.length()
 
                         async(SendDatagramPacket(packet.first, host, port)) {
-                            async(SendDatagramPacket(packet.second, host, port)) {
-                                thenSync({}, {
-                                    requestTimer.stop()
-                                })
-                            }
+                            thenAsync(SendDatagramPacket(packet.second, host, port))
+
                             after().thenSync({}, {
                                 log.warn("send", "failure", arrayOf("gangliaPort", "gangliaHost", "metricsCluster"),
                                         port, host, metrics.cluster, it)
