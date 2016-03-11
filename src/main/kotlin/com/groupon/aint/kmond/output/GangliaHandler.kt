@@ -67,6 +67,7 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
         val packets = createXdrs(metrics)
 
         val appMetrics = appMetricsFactory.create()
+        appMetrics.resetCounter(APP_METRICS_PREFIX + "/unknown_cluster")
 
         if (port != null && hosts.size > 0) {
             val requestTimer = appMetrics.createTimer(APP_METRICS_PREFIX + "/request")
@@ -100,7 +101,7 @@ class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : 
             }
         } else {
             log.warn("send", "unknownCluster", arrayOf("cluster"), metrics.cluster)
-            addSuccessMetric(appMetrics, false)
+            appMetrics.incrementCounter(APP_METRICS_PREFIX + "/unknown_cluster")
             appMetrics.close()
         }
     }

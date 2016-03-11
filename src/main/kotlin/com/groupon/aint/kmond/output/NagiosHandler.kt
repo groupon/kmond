@@ -169,10 +169,10 @@ class NagiosHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory, val
         var countOther: Long = 0
 
         when (statusCode) {
-            in 200..299 -> count2xx += 1
-            in 400..499 -> count4xx += 1
-            in 500..599 -> count5xx += 1
-            else -> countOther += 1
+            in 200..299 -> count2xx = 1
+            in 400..499 -> count4xx = 1
+            in 500..599 -> count5xx = 1
+            else -> countOther = 1
         }
 
         metric.incrementCounter(APP_METRICS_PREFIX + "/status/2xx", count2xx)
