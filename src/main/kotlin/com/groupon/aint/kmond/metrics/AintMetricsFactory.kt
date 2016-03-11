@@ -24,7 +24,6 @@ import io.vertx.core.spi.VertxMetricsFactory
 import io.vertx.core.spi.metrics.VertxMetrics
 import java.io.File
 import java.util.ArrayList
-import kotlin.concurrent.timer
 
 /**
  * Implementation of VertxMetricsFactory using AintMetricsFactory.
@@ -55,11 +54,13 @@ class AintMetricsFactory : VertxMetricsFactory {
         }
 
 
-        val metricsAdapter = AintMetricsAdapter(TsdMetricsFactory.Builder()
+        val metricsFactory = TsdMetricsFactory.Builder()
                 .setSinks(sinkList)
                 .setClusterName(aintMetricsOptions.clusterName)
                 .setServiceName(aintMetricsOptions.serviceName)
-                .build())
+                .build()
+        AintMetricsFactoryWrapper.initialize(metricsFactory)
+        val metricsAdapter = AintMetricsAdapter(metricsFactory)
 
 
         metricsAdapter.start()

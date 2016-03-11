@@ -15,8 +15,10 @@
  */
 package com.groupon.aint.kmond
 
+import com.arpnetworking.metrics.MetricsFactory
 import com.groupon.aint.kmond.config.mock
 import com.groupon.aint.kmond.eventbus.V1ResultCodec
+import com.groupon.aint.kmond.metrics.AintMetricsFactoryWrapper
 import io.vertx.core.Context
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -46,6 +48,7 @@ class KMonDVerticleTest {
     private val metricsConsumer = mock<MessageConsumer<Metrics>>()
     private val metricsProducer = mock<MessageProducer<Metrics>>()
     private val stringProducer = mock<MessageProducer<String>>()
+    private val metricsFactory = mock<MetricsFactory>()
 
     private var kmondConfig = JsonObject()
 
@@ -67,6 +70,8 @@ class KMonDVerticleTest {
     fun startTest() {
         val kmondVerticle = KMonDVerticle()
         kmondVerticle.init(vertx, context)
+
+        AintMetricsFactoryWrapper.initialize(metricsFactory)
 
         val result = Future.future<Void>();
         kmondVerticle.start(result)

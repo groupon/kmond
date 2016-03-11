@@ -15,12 +15,14 @@
  */
 package com.groupon.aint.kmond
 
+import com.arpnetworking.metrics.MetricsFactory
 import com.groupon.aint.kmond.admin.HealthcheckHandler
 import com.groupon.aint.kmond.admin.ReloadConfigHandler
 import com.groupon.aint.kmond.eventbus.CompositeMessageProducer
 import com.groupon.aint.kmond.eventbus.V1ResultCodec
 import com.groupon.aint.kmond.exception.InvalidParameterException
 import com.groupon.aint.kmond.input.V1Handler
+import com.groupon.aint.kmond.metrics.AintMetricsFactoryWrapper
 import com.groupon.aint.kmond.output.GangliaHandler
 import com.groupon.aint.kmond.output.LoggingHandler
 import com.groupon.aint.kmond.output.NagiosHandler
@@ -71,10 +73,16 @@ class KMonDVerticle() : AbstractVerticle() {
         val serverOptions = HttpServerOptions(config)
         val server = vertx.createHttpServer(serverOptions)
 
+        // Get (Aint)Metrics factory for use by Ganglia and Nagios handlers.
+        val metricsFactory: MetricsFactory? = AintMetricsFactoryWrapper.getMetricsFactory()
+        if (metricsFactory == null) {
+            startFuture.fail(IllegalStateException("MetricsFactory not initialized"))
+            return;
+        }
 
-        val gangliaConsumer = eventBus.consumer<Metrics>("ganglia", GangliaHandler(vertx))
-        val nagiosConsumer = eventBus.consumer<Metrics>("nagios", NagiosHandler(vertx, nagiosClusterId,
-                config.getJsonObject("nagiosHttpClient", JsonObject())))
+        val gangliaConsumer = eventBus.consumer<Metrics>("ganglia", GangliaHandler(vertx, metricsFactory))
+        val nagiosConsumer = eventBus.consumer<Metrics>("nagios", NagiosHandler(vertx, metricsFactory,
+                nagiosClusterId, config.getJsonObject("nagiosHttpClient", JsonObject())))
         val loggingConsumer = eventBus.consumer<Metrics>("logger", LoggingHandler())
         loggingConsumer.pause()
 

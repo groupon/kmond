@@ -15,6 +15,8 @@
  */
 package com.groupon.aint.kmond.output
 
+import com.arpnetworking.metrics.MetricsFactory
+import com.arpnetworking.metrics.Timer
 import com.groupon.aint.kmond.Metrics
 import com.groupon.aint.kmond.config.GangliaClusterHostsLoader
 import com.groupon.aint.kmond.config.GangliaClusterPortsLoader
@@ -22,6 +24,7 @@ import com.groupon.aint.kmond.config.model.GangliaClusterHosts
 import com.groupon.aint.kmond.config.model.GangliaClusterPorts
 import com.groupon.aint.kmond.output.model.GangliaMetric
 import com.groupon.aint.kmond.promise.SendDatagramPacket
+import com.groupon.aint.kmond.promise.async
 import com.groupon.aint.kmond.promise.promise
 import com.groupon.vertx.utils.Logger
 import hep.io.xdr.XDROutputStream
@@ -34,15 +37,17 @@ import io.vertx.core.datagram.DatagramSocket
 import io.vertx.core.eventbus.Message
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
-import kotlin.text.Regex
 
 /**
  * Output handler for sending events to Ganglia.
  *
+ * @param appMetricsFactory Used to create metrics that instrument KMonD itself; unrelated to the metrics being forwarded to Ganglia.
+ *
  * @author Gil Markham (gil at groupon dot com)
  */
-class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
+class GangliaHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory) : Handler<Message<Metrics>> {
     private val datagramSocket = vertx.createDatagramSocket()
+    private val APP_METRICS_PREFIX = "downstream/ganglia"
 
     companion object {
         private val log = Logger.getLogger(GangliaHandler::class.java)
@@ -55,29 +60,49 @@ class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
         get() = vertx.sharedData().getLocalMap<String, GangliaClusterHosts>("configs")?.get(GangliaClusterHostsLoader.NAME)
 
     override fun handle(msg: Message<Metrics>) {
+
         val metrics = msg.body()
         val hosts = gangliaHostMapping?.getHosts(metrics.cluster) ?: emptySet()
         val port = gangliaPortMapping?.getPort(metrics.cluster)
         val packets = createXdrs(metrics)
 
+        val appMetrics = appMetricsFactory.create()
+        appMetrics.resetCounter(APP_METRICS_PREFIX + "/unknown_cluster")
+
         if (port != null && hosts.size > 0) {
-            hosts.forEach { host ->
-                packets.forEach { packet ->
-                    promise<DatagramSocket> {
-                        thenAsync(SendDatagramPacket(packet.first, host, port))
-                                .thenAsync(SendDatagramPacket(packet.second, host, port))
+            val requestTimer = appMetrics.createTimer(APP_METRICS_PREFIX + "/request")
+            promise<DatagramSocket> {
+                var packetSizeSum: Long = 0;
+                hosts.forEach { host ->
+                    packets.forEach { packet ->
+                        packetSizeSum += packet.first.length() + packet.second.length()
 
-                        after().thenSync({}, {
-                                    log.warn("send", "failure", arrayOf("gangliaPort", "gangliaHost", "metricsCluster"),
-                                            port, host, metrics.cluster, it)
-                                })
+                        async(SendDatagramPacket(packet.first, host, port)) {
+                            thenAsync(SendDatagramPacket(packet.second, host, port))
 
-                        fulfill(datagramSocket)
+                            after().thenSync({}, {
+                                log.warn("send", "failure", arrayOf("gangliaPort", "gangliaHost", "metricsCluster"),
+                                        port, host, metrics.cluster, it)
+                            })
+                        }
                     }
                 }
+
+                appMetrics.resetCounter(APP_METRICS_PREFIX + "/bytes_sent")
+                appMetrics.incrementCounter(APP_METRICS_PREFIX + "/bytes_sent", packetSizeSum)
+
+                after().thenSync({
+                    closeMetrics(appMetrics, requestTimer, true)
+                }, {
+                    closeMetrics(appMetrics, requestTimer, false)
+                })
+
+                fulfill(datagramSocket)
             }
         } else {
             log.warn("send", "unknownCluster", arrayOf("cluster"), metrics.cluster)
+            appMetrics.incrementCounter(APP_METRICS_PREFIX + "/unknown_cluster")
+            appMetrics.close()
         }
     }
 
@@ -181,5 +206,20 @@ class GangliaHandler(val vertx: Vertx) : Handler<Message<Metrics>> {
             "both" -> 3
             else -> 4
         }
+    }
+
+    private fun closeMetrics(metrics: com.arpnetworking.metrics.Metrics, timer: Timer, success: Boolean) {
+        timer.stop()
+        addSuccessMetric(metrics, success)
+        metrics.close()
+    }
+
+    private fun addSuccessMetric(metrics: com.arpnetworking.metrics.Metrics, success: Boolean) {
+        var successGauge: Long = 0
+        if (success) {
+            successGauge = 1
+        }
+        metrics.resetCounter(APP_METRICS_PREFIX + "/success")
+        metrics.incrementCounter(APP_METRICS_PREFIX + "/success", successGauge)
     }
 }

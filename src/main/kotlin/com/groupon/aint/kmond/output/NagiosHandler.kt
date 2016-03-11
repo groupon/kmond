@@ -15,6 +15,7 @@
  */
 package com.groupon.aint.kmond.output
 
+import com.arpnetworking.metrics.MetricsFactory
 import com.groupon.aint.kmond.Metrics
 import com.groupon.aint.kmond.config.NagiosClusterLoader
 import com.groupon.aint.kmond.config.model.NagiosClusters
@@ -32,10 +33,13 @@ import java.util.concurrent.TimeUnit
 /**
  * Output handler for sending events to Nagios.
  *
+ * @param appMetricsFactory Used to create metrics that instrument KMonD itself; unrelated to the metrics being forwarded to Nagios.
+ *
  * @author fsiegrist (fsiegrist at groupon dot com)
  */
-class NagiosHandler(val vertx: Vertx, val clusterId: String, val httpClientConfig: JsonObject = JsonObject()): Handler<Message<Metrics>> {
+class NagiosHandler(val vertx: Vertx, val appMetricsFactory: MetricsFactory, val clusterId: String, val httpClientConfig: JsonObject = JsonObject()): Handler<Message<Metrics>> {
     private val httpClientsMap = HashMap<String, HttpClient>()
+    private val APP_METRICS_PREFIX = "downstream/nagios"
 
     companion object {
         private val log = Logger.getLogger(NagiosHandler::class.java)
@@ -55,7 +59,17 @@ class NagiosHandler(val vertx: Vertx, val clusterId: String, val httpClientConfi
 
         val nagiosHost = getNagiosHost(clusterId, metrics.host) ?: return
         val httpClient = httpClientsMap[nagiosHost] ?: createHttpClient(nagiosHost)
+
+        val appMetrics: com.arpnetworking.metrics.Metrics = appMetricsFactory.create()
+        appMetrics.resetCounter(APP_METRICS_PREFIX + "/metrics_count")
+        appMetrics.incrementCounter(APP_METRICS_PREFIX + "/metrics_count", metrics.metrics.size.toLong())
+        val timer = appMetrics.createTimer(APP_METRICS_PREFIX + "/request")
+
         val httpRequest = httpClient.request(HttpMethod.POST, "/nagios/cmd.php", {
+            timer.stop()
+            attachStatusMetrics(appMetrics, it.statusCode())
+            appMetrics.close()
+
             event.reply(JsonObject()
                     .put("status", getRequestStatus(it.statusCode()))
                     .put("code", it.statusCode())
@@ -64,6 +78,7 @@ class NagiosHandler(val vertx: Vertx, val clusterId: String, val httpClientConfi
         })
 
         httpRequest.exceptionHandler({
+            appMetrics.close()
             log.error("handle", "exception", "unknown", it)
             event.reply(JsonObject()
                     .put("status", "error")
@@ -145,5 +160,24 @@ class NagiosHandler(val vertx: Vertx, val clusterId: String, val httpClientConfi
 
     private fun calculateBucket(host: String) : Int {
         return host.toByteArray(Charsets.UTF_8).sum() % 100
+    }
+
+    private fun attachStatusMetrics(metric: com.arpnetworking.metrics.Metrics, statusCode: Int) {
+        var count2xx: Long = 0
+        var count4xx: Long = 0
+        var count5xx: Long = 0
+        var countOther: Long = 0
+
+        when (statusCode) {
+            in 200..299 -> count2xx = 1
+            in 400..499 -> count4xx = 1
+            in 500..599 -> count5xx = 1
+            else -> countOther = 1
+        }
+
+        metric.incrementCounter(APP_METRICS_PREFIX + "/status/2xx", count2xx)
+        metric.incrementCounter(APP_METRICS_PREFIX + "/status/4xx", count4xx)
+        metric.incrementCounter(APP_METRICS_PREFIX + "/status/5xx", count5xx)
+        metric.incrementCounter(APP_METRICS_PREFIX + "/status/other", countOther)
     }
 }
