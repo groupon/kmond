@@ -119,9 +119,8 @@ class NagiosHandlerTest {
 
         Mockito.verify(sink, Mockito.times(1)).record(appMetricsEventCaptor.capture())
 
-        val gaugeSamples = appMetricsEventCaptor.value.gaugeSamples
-        assertEquals(1, gaugeSamples.get("downstream/nagios/metrics_count")?.get(0)?.value?.toInt())
         val counterSamples = appMetricsEventCaptor.value.counterSamples
+        assertEquals(1, counterSamples.get("downstream/nagios/metrics_count")?.get(0)?.value?.toInt())
         assertEquals(1, counterSamples.get("downstream/nagios/status/2xx")?.get(0)?.value?.toInt())
         assertEquals(0, counterSamples.get("downstream/nagios/status/4xx")?.get(0)?.value?.toInt())
         assertEquals(0, counterSamples.get("downstream/nagios/status/5xx")?.get(0)?.value?.toInt())
